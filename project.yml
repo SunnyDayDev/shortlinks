@@ -1,0 +1,76 @@
+name: Shortlinks
+
+options:
+  bundleIdPrefix: com.shortlinks
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"            # Swift 5 language mode (без strict concurrency)
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+packages:
+  ArgumentParser:
+    url: https://github.com/apple/swift-argument-parser
+    from: 1.3.0
+
+targets:
+
+  ShortlinksCore:
+    type: library.static
+    platform: macOS
+    sources:
+      - Sources/ShortlinksCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.shortlinks.core
+
+  ShortlinksApp:
+    type: application
+    platform: macOS
+    sources:
+      - Sources/ShortlinksApp
+    dependencies:
+      - target: ShortlinksCore
+    info:
+      path: Sources/ShortlinksApp/Info.plist
+      properties:
+        CFBundleDisplayName: Shortlinks
+        CFBundleName: Shortlinks
+        # false = обычное приложение (Dock + меню-бар), надёжная работа окна и sl://.
+        # Поставьте true, чтобы сделать чистый фоновый агент только в меню-баре.
+        LSUIElement: false
+        LSMinimumSystemVersion: "14.0"
+        NSHumanReadableCopyright: ""
+        CFBundleURLTypes:
+          - CFBundleURLName: com.shortlinks.app.sl
+            CFBundleURLSchemes: [sl]
+    settings:
+      base:
+        PRODUCT_NAME: Shortlinks
+        PRODUCT_BUNDLE_IDENTIFIER: com.shortlinks.app
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        # Локальная подпись по умолчанию (ad-hoc) — собирается без аккаунта.
+        # Чтобы подписывать своим самоподписанным сертификатом, замените "-"
+        # на его имя из Keychain, напр.: CODE_SIGN_IDENTITY: "Shortlinks Self-Signed".
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGN_IDENTITY: "-"
+        PROVISIONING_PROFILE_SPECIFIER: ""
+        ENABLE_HARDENED_RUNTIME: NO
+        ENABLE_APP_SANDBOX: NO
+
+  shortlinks-cli:
+    type: tool
+    platform: macOS
+    sources:
+      - Sources/shortlinks-cli
+    dependencies:
+      - target: ShortlinksCore
+      - package: ArgumentParser
+    settings:
+      base:
+        PRODUCT_NAME: shortlinks
+        PRODUCT_BUNDLE_IDENTIFIER: com.shortlinks.cli
