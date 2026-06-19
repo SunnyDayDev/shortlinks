@@ -1,0 +1,13 @@
+{
+  "name": "shortlinks",
+  "displayName": "Shortlinks",
+  "version": "0.1.0",
+  "description": "Работа с локальными короткими ссылками sl://link/<slug> через CLI shortlinks: создание, список, удаление, резолв и открытие.",
+  "author": {
+    "name": "SunnyDayDev"
+  },
+  "homepage": "https://github.com/SunnyDayDev/shortlinks",
+  "repository": "https://github.com/SunnyDayDev/shortlinks",
+  "license": "MIT",
+  "keywords": ["shortlinks", "cli", "macos", "links"]
+}
