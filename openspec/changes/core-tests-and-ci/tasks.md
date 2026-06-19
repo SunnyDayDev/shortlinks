@@ -18,7 +18,7 @@
 
 - [x] 3.1 Добавить `.github/workflows/ci.yml` (`macos-14`): checkout → `brew install xcodegen` → `xcodegen generate` → `xcodebuild test -scheme ShortlinksCoreTests -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO`
 - [x] 3.2 Настроить триггеры: `pull_request` (branches: main) и `push` (branches: main)
-- [ ] 3.3 Проверить зелёный прогон workflow на PR этого изменения (по логам Actions)
+- [x] 3.3 Проверить зелёный прогон workflow на PR этого изменения (по логам Actions)
 
 ## 4. Документация и проверка спек
 
