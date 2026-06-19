@@ -24,6 +24,10 @@ xcodebuild -project Shortlinks.xcodeproj -scheme shortlinks-cli -configuration R
 - **ShortlinksApp** — SwiftUI: `MenuBarExtra` + `Window`, `ActivationPolicy.accessory`;
   экраны по макету `_design/`; обработка `.onOpenURL` для `sl://`.
 - **shortlinks-cli** — `swift-argument-parser`; команды add/list/rm/open/resolve.
+  CLI **вкладывается внутрь** `Shortlinks.app` (`Contents/MacOS/shortlinks`, copy-фаза
+  app-таргета) — отдельная установка не нужна. Доступность из терминала включается из
+  приложения (Настройки → «Командная строка» или онбординг при первом запуске): симлинк
+  на вложенный бинарь в `~/.local/bin`. Логика — `CLIInstaller` в ShortlinksCore.
 
 ## Ключевые решения (см. `openspec/changes/bootstrap-shortlinks/design.md`)
 

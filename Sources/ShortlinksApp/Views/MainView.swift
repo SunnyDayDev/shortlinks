@@ -33,7 +33,16 @@ struct MainView: View {
         }
         .animation(.easeOut(duration: 0.18), value: model.toast)
         .sheet(isPresented: $model.showCreate) { CreateSheet() }
-        .onAppear { model.openMainWindow = { openWindow(id: "main") } }
+        .alert("Установить команду «shortlinks»?", isPresented: $model.showCLIOnboarding) {
+            Button("Установить") { model.acceptCLIOnboarding() }
+            Button("Не сейчас", role: .cancel) { model.declineCLIOnboarding() }
+        } message: {
+            Text("Команда станет доступна в терминале (симлинк в ~/.local/bin, без пароля администратора). Это можно сделать позже в Настройках.")
+        }
+        .onAppear {
+            model.openMainWindow = { openWindow(id: "main") }
+            model.maybeOfferCLIOnboarding()
+        }
     }
 
     private var content: some View {

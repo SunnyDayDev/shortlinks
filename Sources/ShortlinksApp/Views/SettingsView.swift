@@ -85,6 +85,22 @@ struct SettingsView: View {
                 }
             }
 
+            groupLabel("КОМАНДНАЯ СТРОКА").padding(.top, 22)
+            card {
+                row {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Команда shortlinks в терминале").font(.system(size: 13, weight: .semibold))
+                        cliStatusLine
+                    }
+                    Spacer(minLength: 12)
+                    cliActionButton
+                }
+                if model.cliShowPathHint {
+                    Divider()
+                    cliPathHint
+                }
+            }
+
             groupLabel("ПРИВАТНОСТЬ").padding(.top, 22)
             HStack(alignment: .top, spacing: 13) {
                 Image(systemName: "lock.fill")
@@ -105,7 +121,63 @@ struct SettingsView: View {
         }
         .padding(.horizontal, 24).padding(.top, 18).padding(.bottom, 32)
         .frame(maxWidth: 640, alignment: .leading)
-        .onAppear { handlerOn = model.isDefaultHandler }
+        .onAppear {
+            handlerOn = model.isDefaultHandler
+            model.refreshCLIStatus()
+        }
+    }
+
+    // MARK: - CLI
+
+    @ViewBuilder
+    private var cliStatusLine: some View {
+        switch model.cliStatus {
+        case .installed(let path):
+            Text("Установлен · \(path)")
+                .font(.system(size: 12)).foregroundStyle(Theme.activeAccent)
+        case .notInstalled:
+            Text("Не установлен. Установите, чтобы вызывать shortlinks из терминала.")
+                .font(.system(size: 12)).foregroundStyle(Theme.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        case .conflict(let reason):
+            Text("Конфликт: \(reason)")
+                .font(.system(size: 12)).foregroundStyle(Color(hex: 0xD2372D))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    @ViewBuilder
+    private var cliActionButton: some View {
+        switch model.cliStatus {
+        case .installed:
+            Button("Удалить CLI") { model.uninstallCLI() }
+        case .notInstalled, .conflict:
+            Button("Установить CLI") { model.installCLI() }
+                .buttonStyle(.borderedProminent).tint(Theme.accent)
+        }
+    }
+
+    private var cliPathHint: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Каталог ~/.local/bin не в PATH. Добавьте строку в профиль шелла (например ~/.zshrc):")
+                .font(.system(size: 12)).foregroundStyle(Theme.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack {
+                Text(model.cliPathExportLine)
+                    .font(.system(size: 12, design: .monospaced))
+                    .textSelection(.enabled)
+                Spacer()
+                Button {
+                    model.copy(model.cliPathExportLine)
+                } label: {
+                    Image(systemName: "doc.on.doc")
+                }
+                .buttonStyle(.plain).foregroundStyle(Theme.accent)
+            }
+            .padding(.horizontal, 10).padding(.vertical, 8)
+            .background(Theme.codeBg, in: RoundedRectangle(cornerRadius: 7))
+        }
+        .padding(.horizontal, 16).padding(.vertical, 14)
     }
 
     private func groupLabel(_ text: String) -> some View {
