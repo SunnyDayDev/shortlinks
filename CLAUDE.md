@@ -26,8 +26,10 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 - **ShortlinksApp** — SwiftUI: `MenuBarExtra` + `Window`, `ActivationPolicy.accessory`;
   экраны по макету `_design/`; обработка `.onOpenURL` для `sl://`.
 - **shortlinks-cli** — `swift-argument-parser`; команды add/list/rm/open/resolve.
-  CLI **вкладывается внутрь** `Shortlinks.app` (`Contents/MacOS/shortlinks`, copy-фаза
-  app-таргета) — отдельная установка не нужна. Доступность из терминала включается из
+  CLI **вкладывается внутрь** `Shortlinks.app` (`Contents/Helpers/shortlinks`, copy-фаза
+  app-таргета) — отдельная установка не нужна. Путь `Helpers` (не `Contents/MacOS`)
+  выбран, чтобы имя `shortlinks` не конфликтовало с главным исполняемым `Shortlinks`
+  на регистронезависимом APFS. Доступность из терминала включается из
   приложения (Настройки → «Командная строка» или онбординг при первом запуске): симлинк
   на вложенный бинарь в `~/.local/bin`. Логика — `CLIInstaller` в ShortlinksCore.
 - **ShortlinksCoreTests** (`Tests/ShortlinksCoreTests`) — юнит-тесты доменной логики
