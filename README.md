@@ -41,6 +41,24 @@ shortlinks open <slug>
 shortlinks rm <slug>
 ```
 
+## Навык Claude (использование в других агентах)
+
+В `plugins/shortlinks/` лежит Claude-плагин с навыком, который учит любого
+Claude-агента пользоваться CLI `shortlinks`. Установить его в другой агент:
+
+```bash
+# Локально (разработка): подключить плагин из каталога
+claude --plugin-dir ./plugins/shortlinks
+
+# По Git: добавить этот репозиторий как marketplace и установить плагин
+/plugin marketplace add SunnyDayDev/shortlinks
+/plugin install shortlinks@shortlinks
+```
+
+После установки навык подхватывается автоматически, когда агенту нужно создать,
+найти, резолвить или открыть короткую ссылку. Сам CLI `shortlinks` должен быть
+доступен на машине (см. «Использование CLI» выше).
+
 ## Структура
 
 ```
@@ -49,6 +67,7 @@ Sources/
   ShortlinksCore/        # доменная модель, хранилище, логика (общая)
   ShortlinksApp/         # SwiftUI-приложение (меню-бар + окно)
   shortlinks-cli/        # CLI
+plugins/shortlinks/      # Claude-плагин с навыком работы с CLI
 _design/                 # исходный макет из Claude Design (референс)
 openspec/                # спецификации и план изменений (OpenSpec)
 ```
