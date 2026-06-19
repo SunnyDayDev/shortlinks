@@ -55,8 +55,10 @@ xcodebuild -project Shortlinks.xcodeproj -scheme shortlinks-cli -configuration R
 - **Слияние** — merge-commit (`gh pr merge <n> --merge --delete-branch`): сохраняет
   связь PR↔коммиты. После мержа ветка удаляется, локальный `main` подтягивается
   (`git checkout main && git pull --ff-only`).
-- **Branch protection** для `main` (запрет push, требование PR) — опционально,
-  настраивается вручную в GitHub.
+- **Branch protection** для `main` технически **не включена**: на бесплатном плане
+  GitHub она недоступна для приватного репозитория (нужен GitHub Pro или публичный
+  репо). Поэтому правило «только через PR» соблюдается по договорённости, а не
+  принудительно. При переходе на Pro/публичный репо — включить требование PR.
 
 ## Рабочий процесс (OpenSpec)
 
