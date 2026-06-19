@@ -30,7 +30,7 @@ public enum CLIInstallError: Error, CustomStringConvertible {
 /// обновили приложение — обновился и CLI. Логика вынесена в `ShortlinksCore`, чтобы
 /// быть переиспользуемой и тестируемой без UI.
 public struct CLIInstaller {
-    /// Путь к вложенному в бандл бинарю (`<bundle>/Contents/MacOS/shortlinks`).
+    /// Путь к вложенному в бандл бинарю (`<bundle>/Contents/Helpers/shortlinks`).
     public let bundledBinaryURL: URL
     /// Каталог установки симлинка (`~/.local/bin`).
     public let installDir: URL
@@ -50,7 +50,7 @@ public struct CLIInstaller {
     /// `~/.local/bin` в качестве каталога установки.
     public static func standard() -> CLIInstaller {
         let bundled = Bundle.main.bundleURL
-            .appendingPathComponent("Contents/MacOS", isDirectory: true)
+            .appendingPathComponent("Contents/Helpers", isDirectory: true)
             .appendingPathComponent("shortlinks")
         let dir = FileManager.default.homeDirectoryForCurrentUser
             .appendingPathComponent(".local/bin", isDirectory: true)
@@ -177,10 +177,10 @@ public struct CLIInstaller {
     }
 
     /// Эвристика: цель — вложенный в бандл Shortlinks бинарь
-    /// (`…/Shortlinks.app/Contents/MacOS/<binaryName>`).
+    /// (`…/Shortlinks.app/Contents/Helpers/<binaryName>`).
     private func isShortlinksBinary(_ url: URL) -> Bool {
         url.lastPathComponent == binaryName
-            && url.path.contains("Shortlinks.app/Contents/MacOS")
+            && url.path.contains("Shortlinks.app/Contents/Helpers")
     }
 
     private var prettyPath: String {

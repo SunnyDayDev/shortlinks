@@ -10,9 +10,9 @@ final class CLIInstallerTests: XCTestCase {
         tmp = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
             .appendingPathComponent("cli-installer-tests-\(UUID().uuidString)", isDirectory: true)
         installDir = tmp.appendingPathComponent(".local/bin", isDirectory: true)
-        // Имитируем вложенный в бандл бинарь по реальному пути …/Shortlinks.app/Contents/MacOS/shortlinks.
+        // Имитируем вложенный в бандл бинарь по реальному пути …/Shortlinks.app/Contents/Helpers/shortlinks.
         bundledBinary = tmp
-            .appendingPathComponent("Shortlinks.app/Contents/MacOS", isDirectory: true)
+            .appendingPathComponent("Shortlinks.app/Contents/Helpers", isDirectory: true)
             .appendingPathComponent("shortlinks")
         try FileManager.default.createDirectory(
             at: bundledBinary.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -55,7 +55,7 @@ final class CLIInstallerTests: XCTestCase {
         let installer = makeInstaller()
         // Симлинк указывает на ДРУГОЙ бандл Shortlinks.
         let otherBinary = tmp
-            .appendingPathComponent("Other/Shortlinks.app/Contents/MacOS", isDirectory: true)
+            .appendingPathComponent("Other/Shortlinks.app/Contents/Helpers", isDirectory: true)
             .appendingPathComponent("shortlinks")
         try FileManager.default.createDirectory(
             at: otherBinary.deletingLastPathComponent(), withIntermediateDirectories: true)

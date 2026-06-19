@@ -44,14 +44,17 @@ targets:
       - Sources/ShortlinksApp
     dependencies:
       - target: ShortlinksCore
-      # CLI вкладывается в бандл (Contents/MacOS/shortlinks) и подписывается при копировании,
+      # CLI вкладывается в бандл (Contents/Helpers/shortlinks) и подписывается при копировании,
       # чтобы быть доступным без отдельной установки. См. change bundle-cli-with-app.
+      # Путь Helpers (а не Contents/MacOS) — чтобы имя `shortlinks` не конфликтовало с
+      # главным исполняемым `Shortlinks` на регистронезависимом APFS. См. change
+      # fix-cli-bundle-path-collision.
       - target: shortlinks-cli
         embed: true
         codeSign: true
         copy:
-          destination: executables
-          subpath: ""
+          destination: wrapper
+          subpath: Contents/Helpers
     info:
       path: Sources/ShortlinksApp/Info.plist
       properties:
