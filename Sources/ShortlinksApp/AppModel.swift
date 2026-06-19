@@ -59,6 +59,13 @@ final class AppModel {
     var syncEnabled: Bool = StorageLocation.isSyncEnabled
     var iCloudAvailable: Bool { StorageLocation.isICloudAvailable }
 
+    // CLI (вложен в бандл, ставится симлинком в ~/.local/bin)
+    private let cli = CLIInstaller.standard()
+    var cliStatus: CLIInstallStatus = .notInstalled
+    var cliShowPathHint = false
+    var showCLIOnboarding = false
+    var cliPathExportLine: String { cli.pathExportLine }
+
     /// Установлено сценой — открывает главное окно (для оверлея/подтверждения).
     var openMainWindow: (() -> Void)?
 
@@ -319,6 +326,60 @@ final class AppModel {
         }
     }
 
+    // MARK: - CLI
+
+    /// Пересчитать статус CLI и необходимость подсказки про PATH.
+    func refreshCLIStatus() {
+        cliStatus = cli.status()
+        if case .installed = cliStatus {
+            cliShowPathHint = !cli.installDirOnPATH()
+        } else {
+            cliShowPathHint = false
+        }
+    }
+
+    func installCLI() {
+        do {
+            try cli.install()
+            refreshCLIStatus()
+            flashToast("CLI установлен")
+        } catch {
+            flashToast("\(error)")
+        }
+    }
+
+    func uninstallCLI() {
+        do {
+            try cli.uninstall()
+            refreshCLIStatus()
+            flashToast("CLI удалён")
+        } catch {
+            flashToast("\(error)")
+        }
+    }
+
+    /// Один раз при первом запуске предлагает установить CLI, если он ещё не установлен.
+    func maybeOfferCLIOnboarding() {
+        guard !Prefs.cliOnboardingShown else { return }
+        refreshCLIStatus()
+        if case .installed = cliStatus {
+            Prefs.cliOnboardingShown = true   // уже установлен — не предлагаем
+            return
+        }
+        showCLIOnboarding = true
+    }
+
+    func acceptCLIOnboarding() {
+        Prefs.cliOnboardingShown = true
+        showCLIOnboarding = false
+        installCLI()
+    }
+
+    func declineCLIOnboarding() {
+        Prefs.cliOnboardingShown = true
+        showCLIOnboarding = false
+    }
+
     // MARK: - URL scheme handler
 
     var isDefaultHandler: Bool {
@@ -360,5 +421,9 @@ enum Prefs {
     static var redirectMode: RedirectMode {
         get { RedirectMode(rawValue: d.string(forKey: "redirectMode") ?? "instant") ?? .instant }
         set { d.set(newValue.rawValue, forKey: "redirectMode") }
+    }
+    static var cliOnboardingShown: Bool {
+        get { d.bool(forKey: "cliOnboardingShown") }
+        set { d.set(newValue, forKey: "cliOnboardingShown") }
     }
 }

@@ -16,6 +16,16 @@ packages:
     url: https://github.com/apple/swift-argument-parser
     from: 1.3.0
 
+schemes:
+  ShortlinksCoreTests:
+    build:
+      targets:
+        ShortlinksCore: all
+        ShortlinksCoreTests: [test]
+    test:
+      targets:
+        - ShortlinksCoreTests
+
 targets:
 
   ShortlinksCore:
@@ -34,6 +44,14 @@ targets:
       - Sources/ShortlinksApp
     dependencies:
       - target: ShortlinksCore
+      # CLI вкладывается в бандл (Contents/MacOS/shortlinks) и подписывается при копировании,
+      # чтобы быть доступным без отдельной установки. См. change bundle-cli-with-app.
+      - target: shortlinks-cli
+        embed: true
+        codeSign: true
+        copy:
+          destination: executables
+          subpath: ""
     info:
       path: Sources/ShortlinksApp/Info.plist
       properties:
@@ -75,3 +93,15 @@ targets:
       base:
         PRODUCT_NAME: shortlinks
         PRODUCT_BUNDLE_IDENTIFIER: com.shortlinks.cli
+
+  ShortlinksCoreTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - Tests/ShortlinksCoreTests
+    dependencies:
+      - target: ShortlinksCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.shortlinks.core.tests
+        GENERATE_INFOPLIST_FILE: YES
