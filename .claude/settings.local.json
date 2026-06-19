@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(openspec --version)",
+      "Bash(openspec new *)",
+      "Bash(openspec status *)",
+      "Bash(openspec instructions *)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('INSTRUCTION:\\\\n'+d['instruction']\\); print\\('\\\\nTEMPLATE:\\\\n'+d['template']\\)\")"
+    ]
+  }
+}

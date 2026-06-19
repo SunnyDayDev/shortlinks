@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  *{box-sizing:border-box;-webkit-font-smoothing:antialiased;}
+  html,body{margin:0;height:100%;}
+  ::selection{background:rgba(42,111,219,0.22);}
+  input{font:inherit;}
+  @keyframes ucfade{from{opacity:0}to{opacity:1}}
+  @keyframes ucsheet{from{opacity:0;transform:translate(-50%,-24px)}to{opacity:1;transform:translate(-50%,0)}}
+  @keyframes ucpop{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+  @keyframes ucspin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+
+<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#2e4a73 0%,#5b6f95 55%,#9aa3bd 100%);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;font-size:13px;color:#1d1d1f;overflow:hidden;">
+
+ <div style="position:relative;width:1100px;height:768px;flex-shrink:0;transform:scale({{ stageScale }});transform-origin:center;display:flex;flex-direction:column;">
+
+  <!-- menu bar -->
+  <div style="position:relative;flex-shrink:0;height:26px;display:flex;align-items:center;gap:18px;padding:0 14px;background:rgba(255,255,255,0.28);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);font-size:13px;font-weight:500;color:rgba(255,255,255,0.95);text-shadow:0 0 1px rgba(0,0,0,0.15);">
+    <div style="width:13px;height:13px;border-radius:3px;background:rgba(255,255,255,0.9);"></div>
+    <span style="font-weight:700;">Ссылки</span>
+    <span style="opacity:0.92;">Файл</span>
+    <span style="opacity:0.92;">Правка</span>
+    <span style="opacity:0.92;">Вид</span>
+    <span style="opacity:0.92;">Окно</span>
+    <span style="opacity:0.92;">Помощь</span>
+    <div style="flex:1;"></div>
+    <span style="opacity:0.92;font-variant-numeric:tabular-nums;">Чт 19 июня</span>
+    <span style="opacity:0.92;font-variant-numeric:tabular-nums;">9:41</span>
+  </div>
+
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:0;">
+  <!-- window -->
+  <div style="position:relative;width:1060px;height:720px;border-radius:12px;overflow:hidden;background:#ffffff;box-shadow:0 0 0 0.5px rgba(0,0,0,0.28),0 30px 80px rgba(0,0,0,0.45);display:flex;">
+
+    <!-- sidebar -->
+    <div data-screen-label="Боковая панель" style="width:240px;flex-shrink:0;background:#f0f0f3;border-right:0.5px solid rgba(0,0,0,0.10);display:flex;flex-direction:column;">
+      <div style="height:52px;flex-shrink:0;display:flex;align-items:center;gap:8px;padding:0 18px;-webkit-app-region:drag;">
+        <div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;border:0.5px solid rgba(0,0,0,0.08);"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#febc2e;border:0.5px solid rgba(0,0,0,0.08);"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#28c840;border:0.5px solid rgba(0,0,0,0.08);"></div>
+      </div>
+
+      <div style="flex:1;overflow-y:auto;padding:6px 0;">
+        <div style="padding:8px 20px 6px;font-size:11px;font-weight:700;letter-spacing:0.03em;color:rgba(60,60,67,0.45);">БИБЛИОТЕКА</div>
+
+        <div onClick="{{ goAll }}" style="display:flex;align-items:center;gap:9px;margin:1px 10px;padding:6px 10px;border-radius:7px;cursor:pointer;background:{{ navAllBg }};" style-hover="background:rgba(0,0,0,0.045)">
+          <div style="width:20px;height:20px;border-radius:5px;background:#2A6FDB;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><div style="width:9px;height:9px;border-radius:50%;border:1.8px solid #fff;"></div></div>
+          <span style="font-weight:500;flex:1;">Все ссылки</span>
+          <span style="font-size:12px;color:rgba(60,60,67,0.5);font-variant-numeric:tabular-nums;">{{ countAll }}</span>
+        </div>
+
+        <div onClick="{{ goActive }}" style="display:flex;align-items:center;gap:9px;margin:1px 10px;padding:6px 10px;border-radius:7px;cursor:pointer;background:{{ navActiveBg }};" style-hover="background:rgba(0,0,0,0.045)">
+          <div style="width:20px;height:20px;border-radius:5px;background:#28a55f;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><div style="width:8px;height:8px;border-radius:50%;background:#fff;"></div></div>
+          <span style="font-weight:500;flex:1;">Активные</span>
+          <span style="font-size:12px;color:rgba(60,60,67,0.5);font-variant-numeric:tabular-nums;">{{ countActive }}</span>
+        </div>
+
+        <div onClick="{{ goOnce }}" style="display:flex;align-items:center;gap:9px;margin:1px 10px;padding:6px 10px;border-radius:7px;cursor:pointer;background:{{ navOnceBg }};" style-hover="background:rgba(0,0,0,0.045)">
+          <div style="width:20px;height:20px;border-radius:5px;background:#e08a2b;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><div style="width:9px;height:2.4px;border-radius:2px;background:#fff;"></div></div>
+          <span style="font-weight:500;flex:1;">Одноразовые</span>
+          <span style="font-size:12px;color:rgba(60,60,67,0.5);font-variant-numeric:tabular-nums;">{{ countOnce }}</span>
+        </div>
+
+        <div onClick="{{ goExpired }}" style="display:flex;align-items:center;gap:9px;margin:1px 10px;padding:6px 10px;border-radius:7px;cursor:pointer;background:{{ navExpiredBg }};" style-hover="background:rgba(0,0,0,0.045)">
+          <div style="width:20px;height:20px;border-radius:5px;background:#9aa0aa;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><div style="width:8px;height:8px;border-radius:50%;border:1.8px solid #fff;"></div></div>
+          <span style="font-weight:500;flex:1;">Истёкшие</span>
+          <span style="font-size:12px;color:rgba(60,60,67,0.5);font-variant-numeric:tabular-nums;">{{ countExpired }}</span>
+        </div>
+
+        <sc-if value="{{ hasTagList }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:14px 20px 6px;font-size:11px;font-weight:700;letter-spacing:0.03em;color:rgba(60,60,67,0.45);">ТЕГИ</div>
+        <sc-for list="{{ tagList }}" as="tag" hint-placeholder-count="3">
+        <div onClick="{{ tag.onClick }}" style="display:flex;align-items:center;gap:9px;margin:1px 10px;padding:6px 10px;border-radius:7px;cursor:pointer;background:{{ tag.bg }};" style-hover="background:rgba(0,0,0,0.045)">
+          <div style="width:20px;height:20px;border-radius:5px;background:#c3c7d0;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">#</div>
+          <span style="font-weight:500;flex:1;">{{ tag.name }}</span>
+          <span style="font-size:12px;color:rgba(60,60,67,0.5);font-variant-numeric:tabular-nums;">{{ tag.count }}</span>
+        </div>
+        </sc-for>
+        </sc-if>
+
+        <div style="height:1px;background:rgba(0,0,0,0.07);margin:10px 18px;"></div>
+
+        <div onClick="{{ goSettings }}" style="display:flex;align-items:center;gap:9px;margin:1px 10px;padding:6px 10px;border-radius:7px;cursor:pointer;background:{{ navSettingsBg }};" style-hover="background:rgba(0,0,0,0.045)">
+          <div style="width:20px;height:20px;border-radius:5px;background:#8e8e93;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><div style="width:9px;height:9px;border-radius:50%;border:2px solid #fff;"></div></div>
+          <span style="font-weight:500;flex:1;">Настройки</span>
+        </div>
+
+        <div onClick="{{ goHow }}" style="display:flex;align-items:center;gap:9px;margin:1px 10px;padding:6px 10px;border-radius:7px;cursor:pointer;background:{{ navHowBg }};" style-hover="background:rgba(0,0,0,0.045)">
+          <div style="width:20px;height:20px;border-radius:5px;background:#5b6f95;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px;">?</div>
+          <span style="font-weight:500;flex:1;">Как это работает</span>
+        </div>
+      </div>
+
+      <div style="flex-shrink:0;padding:10px 18px;border-top:0.5px solid rgba(0,0,0,0.07);display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(60,60,67,0.55);">
+        <div style="width:6px;height:6px;border-radius:50%;background:#28a55f;"></div>
+        Хранится локально на этом Mac
+      </div>
+    </div>
+
+    <!-- main -->
+    <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+      <!-- toolbar -->
+      <div style="height:52px;flex-shrink:0;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:0.5px solid rgba(0,0,0,0.09);-webkit-app-region:drag;">
+        <div style="font-size:15px;font-weight:700;color:#1d1d1f;white-space:nowrap;max-width:340px;overflow:hidden;text-overflow:ellipsis;">{{ toolbarTitle }}</div>
+        <div style="flex:1;"></div>
+        <div style="display:flex;align-items:center;gap:6px;height:30px;padding:0 10px;border-radius:7px;background:rgba(0,0,0,0.05);width:200px;">
+          <div style="width:13px;height:13px;border-radius:50%;border:1.6px solid rgba(60,60,67,0.5);position:relative;flex-shrink:0;"><div style="position:absolute;right:-3px;bottom:-3px;width:6px;height:1.6px;background:rgba(60,60,67,0.5);transform:rotate(45deg);border-radius:2px;"></div></div>
+          <input value="{{ query }}" onInput="{{ onSearch }}" placeholder="Поиск" style="border:none;background:transparent;outline:none;width:100%;font-size:13px;color:#1d1d1f;" />
+        </div>
+        <div onClick="{{ openCreate }}" style="display:flex;align-items:center;gap:6px;height:30px;padding:0 13px;border-radius:7px;background:#2A6FDB;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;" style-hover="background:#2360c0">
+          <span style="font-size:16px;font-weight:400;line-height:1;margin-top:-1px;">+</span>Новая ссылка
+        </div>
+      </div>
+
+      <!-- content -->
+      <div style="flex:1;overflow-y:auto;position:relative;">
+
+        <!-- LIST -->
+        <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Список ссылок" style="padding:14px 16px 24px;">
+
+          <sc-if value="{{ hasLinks }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ links }}" as="item" hint-placeholder-count="4">
+            <div onClick="{{ item.onOpen }}" style="display:flex;align-items:center;gap:13px;padding:12px 14px;border-radius:10px;border:0.5px solid rgba(0,0,0,0.09);background:#fff;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,0.03);" style-hover="background:#fafafa;border-color:rgba(0,0,0,0.16)">
+              <div style="width:38px;height:38px;border-radius:9px;background:#eceef2;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:11px;font-weight:600;color:#5b6478;">{{ item.iconText }}</div>
+              <div style="flex:1;min-width:0;">
+                <div style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13.5px;color:#1d1d1f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="color:rgba(60,60,67,0.45);">sl://link/</span>{{ item.slug }}</div>
+                <div style="font-size:12px;color:rgba(60,60,67,0.6);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ item.target }}</div>
+                <div style="font-size:11.5px;color:rgba(60,60,67,0.5);margin-top:4px;">{{ item.sub }}</div>
+                <sc-if value="{{ item.hasTags }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;">
+                  <sc-for list="{{ item.tags }}" as="tag" hint-placeholder-count="2">
+                  <span style="font-size:11px;font-weight:600;color:#3f6bb5;background:rgba(42,111,219,0.1);padding:2px 8px;border-radius:5px;">#{{ tag }}</span>
+                  </sc-for>
+                </div>
+                </sc-if>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;padding:3px 9px;border-radius:20px;background:{{ item.statusBg }};color:{{ item.statusFg }};font-size:11.5px;font-weight:600;white-space:nowrap;flex-shrink:0;">{{ item.statusLabel }}</div>
+              <div style="color:rgba(60,60,67,0.3);font-size:18px;flex-shrink:0;">›</div>
+            </div>
+            </sc-for>
+          </div>
+          </sc-if>
+
+          <sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:90px 20px;text-align:center;">
+            <div style="width:64px;height:64px;border-radius:16px;background:#eceef2;display:flex;align-items:center;justify-content:center;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:15px;color:#9aa0ac;margin-bottom:16px;">sl://</div>
+            <div style="font-size:16px;font-weight:600;color:#1d1d1f;">Здесь пока пусто</div>
+            <div style="font-size:13px;color:rgba(60,60,67,0.6);margin-top:6px;max-width:280px;">Создайте короткую ссылку — она будет работать только на этом Mac.</div>
+            <div onClick="{{ openCreate }}" style="margin-top:18px;display:flex;align-items:center;gap:6px;height:32px;padding:0 16px;border-radius:8px;background:#2A6FDB;color:#fff;font-size:13px;font-weight:600;cursor:pointer;" style-hover="background:#2360c0"><span style="font-size:16px;line-height:1;">+</span>Новая ссылка</div>
+          </div>
+          </sc-if>
+
+        </div>
+        </sc-if>
+
+        <!-- DETAIL -->
+        <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Карточка ссылки" style="padding:18px 24px 28px;max-width:680px;">
+          <div onClick="{{ back }}" style="display:inline-flex;align-items:center;gap:5px;font-size:13px;color:#2A6FDB;cursor:pointer;font-weight:500;margin-bottom:18px;" style-hover="opacity:0.7">‹ Все ссылки</div>
+
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
+            <div style="width:52px;height:52px;border-radius:12px;background:#eceef2;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13px;font-weight:600;color:#5b6478;">{{ detail.iconText }}</div>
+            <div style="min-width:0;flex:1;">
+              <div style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:18px;font-weight:600;color:#1d1d1f;">{{ detail.fullUrl }}</div>
+              <div style="display:inline-flex;align-items:center;gap:6px;margin-top:7px;padding:3px 9px;border-radius:20px;background:{{ detail.statusBg }};color:{{ detail.statusFg }};font-size:11.5px;font-weight:600;">{{ detail.statusLabel }}</div>
+            </div>
+            <div onClick="{{ detail.onCopy }}" style="height:30px;padding:0 13px;display:flex;align-items:center;border-radius:7px;background:rgba(0,0,0,0.05);font-size:12.5px;font-weight:600;color:#1d1d1f;cursor:pointer;white-space:nowrap;" style-hover="background:rgba(0,0,0,0.09)">Копировать</div>
+          </div>
+
+          <div style="border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;overflow:hidden;background:#fff;">
+            <div style="display:flex;padding:13px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);"><div style="width:150px;color:rgba(60,60,67,0.6);">Перенаправляет на</div><div style="flex:1;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12.5px;word-break:break-all;">{{ detail.target }}</div></div>
+            <div style="display:flex;padding:13px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);"><div style="width:150px;color:rgba(60,60,67,0.6);">Тип</div><div style="flex:1;font-weight:500;">{{ detail.kindLabel }}</div></div>
+            <div style="display:flex;padding:13px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);"><div style="width:150px;color:rgba(60,60,67,0.6);">Переходов</div><div style="flex:1;font-weight:500;font-variant-numeric:tabular-nums;">{{ detail.opensText }}</div></div>
+            <div style="display:flex;padding:13px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);"><div style="width:150px;color:rgba(60,60,67,0.6);">Срок действия</div><div style="flex:1;font-weight:500;">{{ detail.expiresText }}</div></div>
+            <div style="display:flex;padding:13px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);"><div style="width:150px;color:rgba(60,60,67,0.6);">Пароль</div><div style="flex:1;font-weight:500;">{{ detail.passwordText }}</div></div>
+            <sc-if value="{{ detail.hasTags }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;padding:13px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);"><div style="width:150px;color:rgba(60,60,67,0.6);">Метки</div><div style="flex:1;display:flex;flex-wrap:wrap;gap:6px;"><sc-for list="{{ detail.tags }}" as="tag" hint-placeholder-count="2"><span style="font-size:11.5px;font-weight:600;color:#3f6bb5;background:rgba(42,111,219,0.1);padding:2px 9px;border-radius:6px;">#{{ tag }}</span></sc-for></div></div>
+            </sc-if>
+            <div style="display:flex;padding:13px 16px;"><div style="width:150px;color:rgba(60,60,67,0.6);">Создана</div><div style="flex:1;font-weight:500;">{{ detail.created }}</div></div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:20px;align-items:center;">
+            <sc-if value="{{ detail.canOpen }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ detail.onOpen }}" style="height:36px;padding:0 18px;display:flex;align-items:center;gap:7px;border-radius:9px;background:#2A6FDB;color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="background:#2360c0">→ {{ detail.openLabel }}</div>
+            </sc-if>
+            <sc-if value="{{ detail.cannotOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="height:36px;padding:0 18px;display:flex;align-items:center;border-radius:9px;background:rgba(0,0,0,0.05);color:rgba(60,60,67,0.5);font-size:13.5px;font-weight:600;">Ссылка недоступна</div>
+            </sc-if>
+            <div style="flex:1;"></div>
+            <div onClick="{{ detail.onDelete }}" style="height:36px;padding:0 16px;display:flex;align-items:center;border-radius:9px;background:rgba(210,55,45,0.08);color:#c0392b;font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="background:rgba(210,55,45,0.15)">Удалить</div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- SETTINGS -->
+        <sc-if value="{{ showSettings }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Настройки" style="padding:18px 24px 32px;max-width:640px;">
+
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.03em;color:rgba(60,60,67,0.5);margin:4px 2px 8px;">РАЗРЕШЕНИЕ ССЫЛОК</div>
+          <div style="border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;background:#fff;padding:14px 16px;display:flex;align-items:center;gap:14px;">
+            <div style="flex:1;"><div style="font-weight:600;">Обработчик схемы <span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;">sl://</span></div><div style="font-size:12px;color:rgba(60,60,67,0.6);margin-top:3px;">Приложение зарегистрировано как обработчик ссылок для этого Mac.</div></div>
+            <div onClick="{{ toggleHandler }}" style="width:40px;height:24px;border-radius:13px;background:{{ handlerSwitch.bg }};position:relative;cursor:pointer;flex-shrink:0;transition:background 0.18s;"><div style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);transform:translateX({{ handlerSwitch.x }});transition:transform 0.18s;"></div></div>
+          </div>
+
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.03em;color:rgba(60,60,67,0.5);margin:22px 2px 8px;">ПО УМОЛЧАНИЮ ДЛЯ НОВЫХ ССЫЛОК</div>
+          <div style="border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;background:#fff;overflow:hidden;">
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);">
+              <div style="flex:1;font-weight:500;">Тип ссылки</div>
+              <div style="display:flex;background:rgba(0,0,0,0.06);border-radius:7px;padding:2px;">
+                <div onClick="{{ sDefKindOnce }}" style="padding:5px 12px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ sKindOnceSeg.bg }};color:{{ sKindOnceSeg.fg }};box-shadow:{{ sKindOnceSeg.sh }};">Одноразовая</div>
+                <div onClick="{{ sDefKindReuse }}" style="padding:5px 12px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ sKindReuseSeg.bg }};color:{{ sKindReuseSeg.fg }};box-shadow:{{ sKindReuseSeg.sh }};">Многоразовая</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);">
+              <div style="flex:1;font-weight:500;">Срок действия</div>
+              <div style="display:flex;background:rgba(0,0,0,0.06);border-radius:7px;padding:2px;">
+                <div onClick="{{ sLife1 }}" style="padding:5px 11px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ sLife1Seg.bg }};color:{{ sLife1Seg.fg }};box-shadow:{{ sLife1Seg.sh }};">1 ч</div>
+                <div onClick="{{ sLife24 }}" style="padding:5px 11px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ sLife24Seg.bg }};color:{{ sLife24Seg.fg }};box-shadow:{{ sLife24Seg.sh }};">24 ч</div>
+                <div onClick="{{ sLife7 }}" style="padding:5px 11px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ sLife7Seg.bg }};color:{{ sLife7Seg.fg }};box-shadow:{{ sLife7Seg.sh }};">7 дн</div>
+                <div onClick="{{ sLifeNever }}" style="padding:5px 11px;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ sLifeNeverSeg.bg }};color:{{ sLifeNeverSeg.fg }};box-shadow:{{ sLifeNeverSeg.sh }};">Без срока</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:0.5px solid rgba(0,0,0,0.07);">
+              <div style="flex:1;font-weight:500;">Запрашивать пароль</div>
+              <div onClick="{{ toggleDefPw }}" style="width:40px;height:24px;border-radius:13px;background:{{ defPwSwitch.bg }};position:relative;cursor:pointer;flex-shrink:0;transition:background 0.18s;"><div style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);transform:translateX({{ defPwSwitch.x }});transition:transform 0.18s;"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;">
+              <div style="flex:1;font-weight:500;">Копировать после создания</div>
+              <div onClick="{{ toggleCopy }}" style="width:40px;height:24px;border-radius:13px;background:{{ copySwitch.bg }};position:relative;cursor:pointer;flex-shrink:0;transition:background 0.18s;"><div style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);transform:translateX({{ copySwitch.x }});transition:transform 0.18s;"></div></div>
+            </div>
+          </div>
+
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.03em;color:rgba(60,60,67,0.5);margin:22px 2px 8px;">ПРИВАТНОСТЬ</div>
+          <div style="border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;background:#fbfbfd;padding:16px;display:flex;gap:13px;align-items:flex-start;">
+            <div style="width:30px;height:30px;border-radius:8px;background:#28a55f;flex-shrink:0;display:flex;align-items:center;justify-content:center;"><div style="width:9px;height:7px;border:2px solid #fff;border-top:none;border-radius:0 0 3px 3px;position:relative;margin-top:5px;"><div style="position:absolute;top:-6px;left:0.5px;width:6px;height:6px;border:2px solid #fff;border-bottom:none;border-radius:4px 4px 0 0;"></div></div></div>
+            <div><div style="font-weight:600;">Приватность по умолчанию</div><div style="font-size:12.5px;color:rgba(60,60,67,0.65);margin-top:4px;line-height:1.5;">Ссылки и их цели хранятся только на этом Mac. Нет аккаунтов, нет облака, ничего не отправляется в сеть.</div></div>
+          </div>
+
+        </div>
+        </sc-if>
+
+        <!-- HOW IT WORKS -->
+        <sc-if value="{{ showHow }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Как это работает" style="padding:22px 24px 32px;max-width:760px;">
+          <div style="font-size:22px;font-weight:700;">Короткая ссылка, которая живёт на вашем Mac</div>
+          <div style="font-size:14px;color:rgba(60,60,67,0.65);margin-top:8px;line-height:1.55;max-width:560px;">Вы создаёте адрес вида <span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;color:#2A6FDB;">sl://link/имя</span>. Когда его открывают, система ловит схему и перенаправляет на полную цель — приложение, файл или сайт.</div>
+
+          <div style="display:flex;gap:12px;margin-top:26px;align-items:stretch;">
+            <div style="flex:1;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;background:#fff;padding:16px;"><div style="width:26px;height:26px;border-radius:8px;background:#2A6FDB;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">1</div><div style="font-weight:600;margin-top:11px;">Создаёте ссылку</div><div style="font-size:12px;color:rgba(60,60,67,0.6);margin-top:5px;line-height:1.5;">Указываете цель и получаете короткий адрес <span style="font-family:'SF Mono',ui-monospace,Menlo,monospace;">sl://link/…</span></div></div>
+            <div style="display:flex;align-items:center;color:rgba(60,60,67,0.3);font-size:20px;">→</div>
+            <div style="flex:1;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;background:#fff;padding:16px;"><div style="width:26px;height:26px;border-radius:8px;background:#2A6FDB;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">2</div><div style="font-weight:600;margin-top:11px;">Делитесь</div><div style="font-size:12px;color:rgba(60,60,67,0.6);margin-top:5px;line-height:1.5;">Отправляете адрес любым способом — он короткий и не раскрывает цель.</div></div>
+            <div style="display:flex;align-items:center;color:rgba(60,60,67,0.3);font-size:20px;">→</div>
+            <div style="flex:1;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;background:#fff;padding:16px;"><div style="width:26px;height:26px;border-radius:8px;background:#2A6FDB;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">3</div><div style="font-weight:600;margin-top:11px;">Переход</div><div style="font-size:12px;color:rgba(60,60,67,0.6);margin-top:5px;line-height:1.5;">Система открывает приложение или браузер по сохранённой цели.</div></div>
+            <div style="display:flex;align-items:center;color:rgba(60,60,67,0.3);font-size:20px;">→</div>
+            <div style="flex:1;border:0.5px solid rgba(0,0,0,0.1);border-radius:12px;background:#fff;padding:16px;"><div style="width:26px;height:26px;border-radius:8px;background:#e08a2b;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">4</div><div style="font-weight:600;margin-top:11px;">Сгорает</div><div style="font-size:12px;color:rgba(60,60,67,0.6);margin-top:5px;line-height:1.5;">Одноразовая ссылка становится недоступной после первого перехода.</div></div>
+          </div>
+
+          <div style="margin-top:24px;border:0.5px solid rgba(42,111,219,0.25);border-radius:12px;background:rgba(42,111,219,0.05);padding:16px 18px;display:flex;gap:14px;align-items:center;">
+            <div style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13px;color:#2A6FDB;white-space:nowrap;">sl://link/<span style="color:#1d1d1f;">demo</span></div>
+            <div style="color:rgba(60,60,67,0.4);">→</div>
+            <div style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13px;color:rgba(60,60,67,0.75);">https://example.com/very/long/target?token=…</div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- TOAST -->
+        <sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:rgba(28,28,30,0.92);color:#fff;font-size:12.5px;font-weight:500;padding:9px 16px;border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,0.3);backdrop-filter:blur(20px);animation:ucfade 0.18s ease;white-space:nowrap;z-index:30;">{{ toastText }}</div>
+        </sc-if>
+
+      </div>
+    </div>
+
+    <!-- CREATE SHEET -->
+    <sc-if value="{{ showSheet }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(0,0,0,0.18);backdrop-filter:blur(1px);z-index:40;animation:ucfade 0.16s ease;" onClick="{{ cancelSheet }}"></div>
+    <div style="position:absolute;top:38px;left:50%;transform:translateX(-50%);width:540px;background:#f6f6f8;border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,0.45),0 0 0 0.5px rgba(0,0,0,0.15);z-index:41;overflow:hidden;animation:ucsheet 0.22s cubic-bezier(0.2,0.9,0.3,1);">
+      <div style="padding:18px 22px 6px;"><div style="font-size:16px;font-weight:700;">Новая ссылка</div><div style="font-size:12.5px;color:rgba(60,60,67,0.6);margin-top:3px;">Цель хранится локально и открывается по короткому адресу.</div></div>
+
+      <div style="padding:14px 22px 0;display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:rgba(60,60,67,0.75);margin-bottom:6px;">Цель перехода</div>
+          <input value="{{ form.target }}" onInput="{{ onTarget }}" placeholder="https://, sl-app://, file:// или путь" style="width:100%;height:34px;padding:0 12px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;outline:none;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13px;" />
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;color:rgba(60,60,67,0.75);margin-bottom:6px;">Короткий адрес</div>
+          <div style="display:flex;align-items:center;height:34px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;overflow:hidden;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13px;">
+            <span style="padding:0 2px 0 12px;color:rgba(60,60,67,0.45);">sl://link/</span>
+            <input value="{{ form.slug }}" onInput="{{ onSlug }}" placeholder="имя" style="flex:1;height:100%;border:none;background:transparent;outline:none;font:inherit;padding:0 8px 0 0;min-width:0;" />
+            <div onClick="{{ regenSlug }}" title="Сгенерировать заново" style="display:flex;align-items:center;gap:5px;margin-right:5px;height:26px;padding:0 10px;border-radius:6px;background:rgba(0,0,0,0.05);color:rgba(60,60,67,0.8);font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',sans-serif;font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0;" style-hover="background:rgba(0,0,0,0.1)">↻ Случайный</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:16px;">
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:rgba(60,60,67,0.75);margin-bottom:6px;">Тип</div>
+            <div style="display:flex;background:rgba(0,0,0,0.06);border-radius:8px;padding:2px;">
+              <div onClick="{{ setOnce }}" style="flex:1;text-align:center;padding:6px 0;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ kindOnceSeg.bg }};color:{{ kindOnceSeg.fg }};box-shadow:{{ kindOnceSeg.sh }};">Одноразовая</div>
+              <div onClick="{{ setReuse }}" style="flex:1;text-align:center;padding:6px 0;border-radius:6px;font-size:12.5px;font-weight:600;cursor:pointer;background:{{ kindReuseSeg.bg }};color:{{ kindReuseSeg.fg }};box-shadow:{{ kindReuseSeg.sh }};">Многоразовая</div>
+            </div>
+          </div>
+          <div style="flex:1;">
+            <div style="font-size:12px;font-weight:600;color:rgba(60,60,67,0.75);margin-bottom:6px;">Срок действия</div>
+            <div style="display:flex;background:rgba(0,0,0,0.06);border-radius:8px;padding:2px;">
+              <div onClick="{{ exp.h1 }}" style="flex:1;text-align:center;padding:6px 0;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:{{ exp1Seg.bg }};color:{{ exp1Seg.fg }};box-shadow:{{ exp1Seg.sh }};">1 ч</div>
+              <div onClick="{{ exp.h24 }}" style="flex:1;text-align:center;padding:6px 0;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:{{ exp24Seg.bg }};color:{{ exp24Seg.fg }};box-shadow:{{ exp24Seg.sh }};">24 ч</div>
+              <div onClick="{{ exp.d7 }}" style="flex:1;text-align:center;padding:6px 0;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:{{ exp7Seg.bg }};color:{{ exp7Seg.fg }};box-shadow:{{ exp7Seg.sh }};">7 дн</div>
+              <div onClick="{{ exp.never }}" style="flex:1;text-align:center;padding:6px 0;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;background:{{ expNeverSeg.bg }};color:{{ expNeverSeg.fg }};box-shadow:{{ expNeverSeg.sh }};">∞</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size:12px;font-weight:600;color:rgba(60,60,67,0.75);margin-bottom:6px;">Метки</div>
+          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:34px;padding:5px 8px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;">
+            <sc-for list="{{ formTags }}" as="tag" hint-placeholder-count="0">
+            <span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:#3f6bb5;background:rgba(42,111,219,0.12);padding:3px 5px 3px 9px;border-radius:6px;">#{{ tag.name }}<span onClick="{{ tag.onRemove }}" style="cursor:pointer;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(42,111,219,0.18);font-size:11px;line-height:1;">×</span></span>
+            </sc-for>
+            <input value="{{ form.tagInput }}" onInput="{{ onTagInput }}" onKeyDown="{{ onTagKey }}" placeholder="Добавить метку…" style="flex:1;min-width:90px;height:24px;border:none;background:transparent;outline:none;font-size:13px;" />
+          </div>
+          <div style="font-size:11px;color:rgba(60,60,67,0.5);margin-top:5px;">Enter или запятая — добавить метку</div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:14px;padding:2px 0;">
+          <div style="flex:1;"><div style="font-size:13px;font-weight:500;">Защитить паролем</div><div style="font-size:11.5px;color:rgba(60,60,67,0.6);margin-top:2px;">Запросить пароль перед переходом</div></div>
+          <div onClick="{{ togglePw }}" style="width:40px;height:24px;border-radius:13px;background:{{ pwSwitch.bg }};position:relative;cursor:pointer;flex-shrink:0;transition:background 0.18s;"><div style="position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.3);transform:translateX({{ pwSwitch.x }});transition:transform 0.18s;"></div></div>
+        </div>
+        <sc-if value="{{ form.passwordOn }}" hint-placeholder-val="{{ false }}">
+        <input value="{{ form.password }}" onInput="{{ onPassword }}" placeholder="Пароль" type="password" style="width:100%;height:34px;padding:0 12px;border-radius:8px;border:0.5px solid rgba(0,0,0,0.18);background:#fff;outline:none;font-size:13px;margin-top:-6px;" />
+        </sc-if>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;padding:18px 22px;margin-top:8px;border-top:0.5px solid rgba(0,0,0,0.08);background:rgba(0,0,0,0.015);">
+        <div onClick="{{ cancelSheet }}" style="height:32px;padding:0 16px;display:flex;align-items:center;border-radius:8px;background:rgba(0,0,0,0.06);font-size:13px;font-weight:600;cursor:pointer;" style-hover="background:rgba(0,0,0,0.1)">Отмена</div>
+        <div onClick="{{ submitCreate }}" style="height:32px;padding:0 18px;display:flex;align-items:center;border-radius:8px;background:{{ submitBg }};color:#fff;font-size:13px;font-weight:600;cursor:pointer;">Создать ссылку</div>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- REDIRECT OVERLAY -->
+    <sc-if value="{{ showRedirect }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(20,22,28,0.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:50;display:flex;align-items:center;justify-content:center;animation:ucfade 0.18s ease;">
+      <div style="width:430px;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,0.5);overflow:hidden;animation:ucpop 0.2s cubic-bezier(0.2,0.9,0.3,1);">
+        <div style="padding:16px 22px;border-bottom:0.5px solid rgba(0,0,0,0.08);display:flex;align-items:center;gap:9px;">
+          <div style="width:18px;height:18px;border-radius:5px;background:#2A6FDB;flex-shrink:0;"></div>
+          <div style="font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:13px;">{{ redirect.fullUrl }}</div>
+        </div>
+
+        <sc-if value="{{ redirect.showReady }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:22px;">
+          <div style="font-size:15px;font-weight:700;">Открыть ссылку?</div>
+          <div style="font-size:13px;color:rgba(60,60,67,0.65);margin-top:6px;line-height:1.5;">Этот короткий адрес перенаправит вас на:</div>
+          <div style="margin-top:12px;padding:12px 14px;border-radius:10px;background:#f4f5f7;font-family:'SF Mono',ui-monospace,Menlo,monospace;font-size:12.5px;word-break:break-all;border:0.5px solid rgba(0,0,0,0.07);">{{ redirect.target }}</div>
+          <sc-if value="{{ redirect.isOnce }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-top:14px;display:flex;gap:9px;align-items:flex-start;padding:11px 13px;border-radius:10px;background:rgba(224,138,43,0.1);border:0.5px solid rgba(224,138,43,0.25);">
+            <div style="width:16px;height:16px;border-radius:50%;background:#e08a2b;color:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;margin-top:1px;">!</div>
+            <div style="font-size:12px;color:#9a5a12;line-height:1.45;">Одноразовая ссылка. После перехода она станет недоступной.</div>
+          </div>
+          </sc-if>
+          <div style="display:flex;gap:10px;margin-top:20px;">
+            <div onClick="{{ redirect.onClose }}" style="flex:1;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:rgba(0,0,0,0.06);font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="background:rgba(0,0,0,0.1)">Отмена</div>
+            <div onClick="{{ redirect.onConfirm }}" style="flex:1.4;height:38px;display:flex;align-items:center;justify-content:center;gap:7px;border-radius:9px;background:#2A6FDB;color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="background:#2360c0">→ {{ redirect.openLabel }}</div>
+          </div>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ redirect.showBlocked }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 22px;text-align:center;">
+          <div style="width:54px;height:54px;border-radius:50%;background:rgba(210,55,45,0.1);margin:0 auto;display:flex;align-items:center;justify-content:center;"><div style="width:22px;height:3px;border-radius:2px;background:#c0392b;transform:rotate(45deg);position:absolute;"></div><div style="width:22px;height:3px;border-radius:2px;background:#c0392b;transform:rotate(-45deg);"></div></div>
+          <div style="font-size:16px;font-weight:700;margin-top:16px;">Ссылка недоступна</div>
+          <div style="font-size:13px;color:rgba(60,60,67,0.65);margin-top:7px;line-height:1.5;max-width:300px;margin-left:auto;margin-right:auto;">{{ redirect.reason }}. Одноразовые ссылки нельзя открыть повторно.</div>
+          <div onClick="{{ redirect.onClose }}" style="margin-top:20px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:rgba(0,0,0,0.06);font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="background:rgba(0,0,0,0.1)">Закрыть</div>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ redirect.showConsumed }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:26px 22px;text-align:center;">
+          <div style="width:54px;height:54px;border-radius:50%;background:rgba(40,165,95,0.12);margin:0 auto;display:flex;align-items:center;justify-content:center;"><div style="width:16px;height:9px;border:3px solid #28a55f;border-top:none;border-right:none;transform:rotate(-45deg);margin-top:-3px;"></div></div>
+          <div style="font-size:16px;font-weight:700;margin-top:16px;">Открыто</div>
+          <div style="font-size:13px;color:rgba(60,60,67,0.65);margin-top:7px;line-height:1.5;max-width:300px;margin-left:auto;margin-right:auto;">Переход выполнен. Эта одноразовая ссылка сгорела и больше недоступна.</div>
+          <div onClick="{{ redirect.onClose }}" style="margin-top:20px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#2A6FDB;color:#fff;font-size:13.5px;font-weight:600;cursor:pointer;" style-hover="background:#2360c0">Готово</div>
+        </div>
+        </sc-if>
+
+      </div>
+    </div>
+    </sc-if>
+
+  </div>
+  </div>
+ </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 'library',
+    filter: 'all',
+    query: '',
+    selectedId: null,
+    sheet: null,
+    redirect: null,
+    toast: null,
+    links: [
+      { id:'a1', slug:'design/figma-spec', target:'https://figma.com/file/8Kx2q/UI-Spec', kind:'reuse', status:'active', opens:12, expires:'never', passwordOn:false, created:'14 июня', tags:['работа','дизайн'] },
+      { id:'a2', slug:'deploy/release-notes', target:'sl-app://deploy/prod/v2.4', kind:'once', status:'active', opens:0, expires:'7d', passwordOn:false, created:'18 июня', tags:['деплой'] },
+      { id:'a3', slug:'db-creds', target:'Заметка · учётные данные сервера', kind:'once', status:'active', opens:0, expires:'1h', passwordOn:true, created:'19 июня', tags:['секрет','работа'] },
+      { id:'a4', slug:'standup', target:'zoom://meeting/99214477', kind:'reuse', status:'active', opens:3, expires:'24h', passwordOn:false, created:'17 июня', tags:['работа'] },
+      { id:'a5', slug:'invoice-q2', target:'file:///Users/me/Documents/invoice-q2.pdf', kind:'once', status:'viewed', opens:1, expires:'24h', passwordOn:false, created:'12 июня', tags:['финансы'] },
+      { id:'a6', slug:'beta-invite', target:'https://app.local/join?token=9f2a', kind:'once', status:'expired', opens:0, expires:'24h', passwordOn:false, created:'2 июня', tags:['личное'] },
+    ],
+    form: { target:'', slug:'', kind:'once', expires:'24h', passwordOn:false, password:'', tags:[], tagInput:'' },
+    settings: { defKind:'once', defLifetime:'24h', defPassword:false, copyOnCreate:true, handler:true },
+  };
+
+  componentDidMount(){ this.fit(); this._r=()=>this.fit(); window.addEventListener('resize', this._r); }
+  componentWillUnmount(){ window.removeEventListener('resize', this._r); clearTimeout(this._t); }
+  fit(){ this.setState({ scale: Math.min(window.innerWidth/1100, window.innerHeight/768) }); }
+
+  plural(n, f){ const a=n%10, b=n%100; if(a===1&&b!==11)return f[0]; if(a>=2&&a<=4&&(b<10||b>=20))return f[1]; return f[2]; }
+  expLabel(e){ return ({'1h':'через 1 час','24h':'через 24 часа','7d':'через 7 дней','never':'без срока'})[e]||'без срока'; }
+  expWord(e){ return ({'1h':'1 час','24h':'24 часа','7d':'7 дней','never':'Без срока'})[e]||'Без срока'; }
+  scheme(t){
+    const s=(t||'').trim();
+    if(/^https?:/i.test(s)) return { icon:'web', open:'Открыть в браузере' };
+    if(/^file:|^\//.test(s)) return { icon:'doc', open:'Открыть файл' };
+    if(/:\/\//.test(s)) return { icon:'app', open:'Открыть в приложении' };
+    return { icon:'txt', open:'Показать содержимое' };
+  }
+  statusView(l){
+    if(l.status==='active') return { label:'Активна', bg:'rgba(40,165,95,0.13)', fg:'#1d7a4a' };
+    if(l.status==='viewed') return { label:'Просмотрена', bg:'rgba(0,0,0,0.06)', fg:'rgba(60,60,67,0.7)' };
+    return { label:'Истекла', bg:'rgba(210,55,45,0.1)', fg:'#c0392b' };
+  }
+  sub(l){
+    const k = l.kind==='once' ? 'Одноразовая' : 'Многоразовая';
+    if(l.status==='active'){
+      if(l.kind==='once') return k+' · истекает '+this.expLabel(l.expires);
+      return k+' · '+l.opens+' '+this.plural(l.opens,['переход','перехода','переходов']);
+    }
+    if(l.status==='viewed') return k+' · открыта '+l.created;
+    return k+' · срок истёк';
+  }
+
+  setFilter(f){ this.setState({ screen:'library', filter:f, selectedId:null }); }
+  goScreen(s){ this.setState({ screen:s, selectedId:null }); }
+  openDetail(id){ this.setState({ selectedId:id, screen:'library' }); }
+  back(){ this.setState({ selectedId:null }); }
+  onSearch(e){ this.setState({ query:e.target.value }); }
+
+  genSlug(){ const a='abcdefghijkmnpqrstuvwxyz23456789'; let s=''; for(let i=0;i<6;i++) s+=a[Math.floor(Math.random()*a.length)]; return s; }
+  cleanSlug(v){ return (v||'').toLowerCase().replace(/[^a-z0-9\-/]/g,'-').replace(/\/{2,}/g,'/').replace(/^\/+/,''); }
+  openCreate(){
+    const st=this.state.settings;
+    this.setState({ sheet:'create', form:{ target:'', slug:this.genSlug(), kind:st.defKind, expires:st.defLifetime, passwordOn:st.defPassword, password:'', tags:[], tagInput:'' } });
+  }
+  regenSlug(){ this.setForm('slug', this.genSlug()); }
+
+  normTag(t){ return (t||'').trim().toLowerCase().replace(/[,/]/g,'').replace(/\s+/g,'-'); }
+  addTag(){ const t=this.normTag(this.state.form.tagInput); if(!t) return; this.setState(s=>({ form:{ ...s.form, tags: s.form.tags.includes(t)?s.form.tags:[...s.form.tags,t], tagInput:'' } })); }
+  onTagKey(e){ if(e.key==='Enter'||e.key===','){ e.preventDefault(); this.addTag(); } else if(e.key==='Backspace' && !this.state.form.tagInput){ this.setState(s=>({ form:{ ...s.form, tags:s.form.tags.slice(0,-1) } })); } }
+  removeTag(t){ this.setState(s=>({ form:{ ...s.form, tags:s.form.tags.filter(x=>x!==t) } })); }
+  cancelSheet(){ this.setState({ sheet:null }); }
+  setForm(k,v){ this.setState(s=>({ form:{ ...s.form, [k]:v } })); }
+  submitCreate(){
+    const f=this.state.form; const t=f.target.trim(); if(!t) return;
+    let slug=this.cleanSlug(f.slug.trim()).replace(/\/+$/,'') || this.genSlug();
+    let tags=[...f.tags]; const pend=this.normTag(f.tagInput); if(pend && !tags.includes(pend)) tags.push(pend);
+    const id='n'+Date.now();
+    const link={ id, slug, target:t, kind:f.kind, status:'active', opens:0, expires:f.expires, passwordOn:f.passwordOn, created:'сегодня', tags };
+    this.setState(s=>({ links:[link,...s.links], sheet:null, selectedId:id, screen:'library', filter:'all' }));
+    if(this.state.settings.copyOnCreate) this.copy('sl://link/'+slug);
+  }
+  deleteLink(id){ this.setState(s=>({ links:s.links.filter(l=>l.id!==id), selectedId:null })); }
+
+  openRedirect(id){
+    const l=this.state.links.find(x=>x.id===id);
+    this.setState({ redirect:{ id, phase: l.status==='active' ? 'ready' : 'blocked' } });
+  }
+  confirmOpen(){
+    const r=this.state.redirect; const l=this.state.links.find(x=>x.id===r.id);
+    if(l.kind==='once'){
+      this.setState(s=>({ links:s.links.map(x=>x.id===l.id?{ ...x, status:'viewed', opens:1, created:'только что' }:x), redirect:{ id:l.id, phase:'consumed' } }));
+    } else {
+      this.setState(s=>({ links:s.links.map(x=>x.id===l.id?{ ...x, opens:x.opens+1 }:x), redirect:null, toast:'Переход выполнен' }));
+      this.flashToast();
+    }
+  }
+  closeRedirect(){ this.setState({ redirect:null }); }
+
+  toggleSetting(k){ this.setState(s=>({ settings:{ ...s.settings, [k]:!s.settings[k] } })); }
+  setSetting(k,v){ this.setState(s=>({ settings:{ ...s.settings, [k]:v } })); }
+
+  copy(text){ try{ navigator.clipboard.writeText(text); }catch(e){} this.setState({ toast:'Скопировано: '+text }); this.flashToast(); }
+  flashToast(){ clearTimeout(this._t); this._t=setTimeout(()=>this.setState({ toast:null }), 1800); }
+
+  seg(on){ return on ? { bg:'#ffffff', fg:'#1d1d1f', sh:'0 1px 3px rgba(0,0,0,0.13)' } : { bg:'transparent', fg:'rgba(60,60,67,0.75)', sh:'none' }; }
+  sw(on){ return on ? { bg:'#2A6FDB', x:'16px' } : { bg:'rgba(120,120,128,0.32)', x:'0px' }; }
+
+  renderVals(){
+    const st=this.state, L=st.links;
+    const counts={
+      all: L.length,
+      active: L.filter(l=>l.status==='active').length,
+      once: L.filter(l=>l.kind==='once').length,
+      expired: L.filter(l=>l.status==='expired'||l.status==='viewed').length,
+    };
+    const q=st.query.trim().toLowerCase();
+    const tagFilter = st.filter.indexOf('tag:')===0 ? st.filter.slice(4) : null;
+    const pass=(l)=>{
+      if(tagFilter){ if(!(l.tags||[]).includes(tagFilter)) return false; }
+      else {
+        if(st.filter==='active' && l.status!=='active') return false;
+        if(st.filter==='once' && l.kind!=='once') return false;
+        if(st.filter==='expired' && !(l.status==='expired'||l.status==='viewed')) return false;
+      }
+      if(q && !(l.slug.toLowerCase().includes(q) || l.target.toLowerCase().includes(q) || (l.tags||[]).some(t=>t.includes(q)))) return false;
+      return true;
+    };
+    const filtered = L.filter(pass).map(l=>{
+      const sc=this.scheme(l.target), sv=this.statusView(l);
+      return { id:l.id, slug:l.slug, target:l.target, iconText:sc.icon, sub:this.sub(l),
+        statusLabel:sv.label, statusBg:sv.bg, statusFg:sv.fg, tags:(l.tags||[]), hasTags:(l.tags||[]).length>0,
+        onOpen:()=>this.openDetail(l.id) };
+    });
+
+    // unique tag list with counts
+    const tagCounts={}; L.forEach(l=>(l.tags||[]).forEach(t=>{ tagCounts[t]=(tagCounts[t]||0)+1; }));
+    const tagList = Object.keys(tagCounts).sort().map(name=>({
+      name, count:String(tagCounts[name]),
+      bg: st.filter==='tag:'+name ? 'rgba(42,111,219,0.14)' : 'transparent',
+      onClick: ()=>this.setFilter('tag:'+name),
+    }));
+    const hasTagList = tagList.length>0;
+
+    const sel = L.find(l=>l.id===st.selectedId);
+    let detail=null;
+    if(sel){
+      const sc=this.scheme(sel.target), sv=this.statusView(sel);
+      detail={
+        iconText:sc.icon, fullUrl:'sl://link/'+sel.slug, target:sel.target,
+        kindLabel: sel.kind==='once'?'Одноразовая':'Многоразовая',
+        statusLabel:sv.label, statusBg:sv.bg, statusFg:sv.fg,
+        opensText: sel.opens+' '+this.plural(sel.opens,['переход','перехода','переходов']),
+        expiresText: sel.status==='active'? this.expWord(sel.expires) : (sel.status==='viewed'?'Просмотрена':'Истёк'),
+        passwordText: sel.passwordOn?'Включён':'Нет',
+        created: sel.created,
+        tags:(sel.tags||[]), hasTags:(sel.tags||[]).length>0,
+        canOpen: sel.status==='active', cannotOpen: sel.status!=='active',
+        openLabel: sc.open,
+        onOpen:()=>this.openRedirect(sel.id),
+        onDelete:()=>this.deleteLink(sel.id),
+        onCopy:()=>this.copy('sl://link/'+sel.slug),
+      };
+    }
+
+    let redirect=null;
+    if(st.redirect){
+      const l=L.find(x=>x.id===st.redirect.id); const sc=this.scheme(l.target);
+      redirect={
+        phase:st.redirect.phase, fullUrl:'sl://link/'+l.slug, target:l.target, openLabel:sc.open,
+        isOnce:l.kind==='once',
+        reason: l.status==='viewed'?'Эта ссылка уже была просмотрена':'Срок действия ссылки истёк',
+        showReady: st.redirect.phase==='ready', showBlocked: st.redirect.phase==='blocked', showConsumed: st.redirect.phase==='consumed',
+        onConfirm:()=>this.confirmOpen(), onClose:()=>this.closeRedirect(),
+      };
+    }
+
+    const isLib = st.screen==='library';
+    const navBg=(on)=> on ? 'rgba(42,111,219,0.14)' : 'transparent';
+    const titles={ all:'Все ссылки', active:'Активные', once:'Одноразовые', expired:'Истёкшие' };
+    const toolbarTitle = sel ? ('sl://link/'+sel.slug)
+      : st.screen==='settings' ? 'Настройки'
+      : st.screen==='how' ? 'Как это работает'
+      : tagFilter ? ('#'+tagFilter)
+      : titles[st.filter];
+
+    return {
+      stageScale: st.scale || 1,
+      countAll:String(counts.all), countActive:String(counts.active), countOnce:String(counts.once), countExpired:String(counts.expired),
+      navAllBg: navBg(isLib && st.filter==='all'),
+      navActiveBg: navBg(isLib && st.filter==='active'),
+      navOnceBg: navBg(isLib && st.filter==='once'),
+      navExpiredBg: navBg(isLib && st.filter==='expired'),
+      navSettingsBg: navBg(st.screen==='settings'),
+      navHowBg: navBg(st.screen==='how'),
+      goAll:()=>this.setFilter('all'), goActive:()=>this.setFilter('active'),
+      goOnce:()=>this.setFilter('once'), goExpired:()=>this.setFilter('expired'),
+      goSettings:()=>this.goScreen('settings'), goHow:()=>this.goScreen('how'),
+
+      toolbarTitle, query:st.query, onSearch:(e)=>this.onSearch(e), openCreate:()=>this.openCreate(),
+
+      showList: isLib && !sel, showDetail: isLib && !!sel,
+      showSettings: st.screen==='settings', showHow: st.screen==='how',
+      hasLinks: filtered.length>0, showEmpty: isLib && !sel && filtered.length===0,
+      links: filtered, detail, back:()=>this.back(),
+
+      showSheet: st.sheet==='create',
+      form: st.form,
+      onTarget:(e)=>this.setForm('target', e.target.value),
+      onSlug:(e)=>this.setForm('slug', this.cleanSlug(e.target.value)),
+      onPassword:(e)=>this.setForm('password', e.target.value),
+      tagList, hasTagList,
+      formTags: st.form.tags.map(t=>({ name:t, onRemove:()=>this.removeTag(t) })),
+      onTagInput:(e)=>this.setForm('tagInput', e.target.value),
+      onTagKey:(e)=>this.onTagKey(e), addTag:()=>this.addTag(),
+      setOnce:()=>this.setForm('kind','once'), setReuse:()=>this.setForm('kind','reuse'),
+      exp:{ h1:()=>this.setForm('expires','1h'), h24:()=>this.setForm('expires','24h'), d7:()=>this.setForm('expires','7d'), never:()=>this.setForm('expires','never') },
+      togglePw:()=>this.setForm('passwordOn', !st.form.passwordOn),
+      regenSlug:()=>this.regenSlug(),
+      cancelSheet:()=>this.cancelSheet(), submitCreate:()=>this.submitCreate(),
+      submitBg: st.form.target.trim()? '#2A6FDB' : 'rgba(42,111,219,0.4)',
+      kindOnceSeg:this.seg(st.form.kind==='once'), kindReuseSeg:this.seg(st.form.kind==='reuse'),
+      exp1Seg:this.seg(st.form.expires==='1h'), exp24Seg:this.seg(st.form.expires==='24h'),
+      exp7Seg:this.seg(st.form.expires==='7d'), expNeverSeg:this.seg(st.form.expires==='never'),
+      pwSwitch:this.sw(st.form.passwordOn),
+
+      sDefKindOnce:()=>this.setSetting('defKind','once'), sDefKindReuse:()=>this.setSetting('defKind','reuse'),
+      sLife1:()=>this.setSetting('defLifetime','1h'), sLife24:()=>this.setSetting('defLifetime','24h'),
+      sLife7:()=>this.setSetting('defLifetime','7d'), sLifeNever:()=>this.setSetting('defLifetime','never'),
+      toggleDefPw:()=>this.toggleSetting('defPassword'), toggleCopy:()=>this.toggleSetting('copyOnCreate'),
+      toggleHandler:()=>this.toggleSetting('handler'),
+      sKindOnceSeg:this.seg(st.settings.defKind==='once'), sKindReuseSeg:this.seg(st.settings.defKind==='reuse'),
+      sLife1Seg:this.seg(st.settings.defLifetime==='1h'), sLife24Seg:this.seg(st.settings.defLifetime==='24h'),
+      sLife7Seg:this.seg(st.settings.defLifetime==='7d'), sLifeNeverSeg:this.seg(st.settings.defLifetime==='never'),
+      defPwSwitch:this.sw(st.settings.defPassword), copySwitch:this.sw(st.settings.copyOnCreate), handlerSwitch:this.sw(st.settings.handler),
+
+      showRedirect: !!st.redirect, redirect,
+      showToast: !!st.toast, toastText: st.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>
