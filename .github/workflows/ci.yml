@@ -13,9 +13,14 @@ concurrency:
 jobs:
   test:
     name: ShortlinksCore tests
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+
+      # XcodeGen (latest) генерирует проект в новом формате pbxproj — выбираем
+      # новейший установленный Xcode, чтобы xcodebuild смог его открыть.
+      - name: Select latest Xcode
+        run: sudo xcode-select -switch "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
 
       - name: Install XcodeGen
         run: brew install xcodegen
