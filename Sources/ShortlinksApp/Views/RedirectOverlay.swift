@@ -46,15 +46,15 @@ struct RedirectOverlay: View {
                     .textSelection(.enabled)
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(hex: 0xF4F5F7), in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.black.opacity(0.07), lineWidth: 0.5))
+                    .background(Theme.codeBg, in: RoundedRectangle(cornerRadius: 10))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.cardBorder, lineWidth: 0.5))
                     .padding(.top, 12)
 
                 if link.kind == .once {
                     HStack(alignment: .top, spacing: 9) {
                         Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Theme.onceAccent)
                         Text("Одноразовая ссылка. После перехода она станет недоступной.")
-                            .font(.system(size: 12)).foregroundStyle(Color(hex: 0x9A5A12))
+                            .font(.system(size: 12)).foregroundStyle(Theme.onceText)
                     }
                     .padding(11)
                     .frame(maxWidth: .infinity, alignment: .leading)

@@ -22,6 +22,23 @@ struct SettingsView: View {
                 }
             }
 
+            groupLabel("ПЕРЕХОД ПО ССЫЛКЕ").padding(.top, 22)
+            card {
+                row {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Режим перехода").font(.system(size: 13, weight: .medium))
+                        Text("«Сразу» открывает цель в фоне без диалога. Защищённые паролем и недоступные ссылки всегда показывают подтверждение.")
+                            .font(.system(size: 12)).foregroundStyle(Theme.secondaryText)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Spacer(minLength: 12)
+                    Picker("", selection: $model.redirectMode) {
+                        Text("Сразу").tag(RedirectMode.instant)
+                        Text("С подтверждением").tag(RedirectMode.confirm)
+                    }.pickerStyle(.segmented).labelsHidden().frame(width: 220)
+                }
+            }
+
             groupLabel("ПО УМОЛЧАНИЮ ДЛЯ НОВЫХ ССЫЛОК").padding(.top, 22)
             card {
                 row {
@@ -77,13 +94,13 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Приватность по умолчанию").font(.system(size: 13, weight: .semibold))
                     Text("Ссылки и их цели хранятся только на этом Mac. При включённой синхронизации они идут через ваш личный iCloud Drive — без аккаунтов сервиса и сторонних серверов.")
-                        .font(.system(size: 12.5)).foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.65))
+                        .font(.system(size: 12.5)).foregroundStyle(Color.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(hex: 0xFBFBFD), in: RoundedRectangle(cornerRadius: 12))
+            .background(Theme.subtleCardBg, in: RoundedRectangle(cornerRadius: 12))
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.cardBorder, lineWidth: 0.5))
         }
         .padding(.horizontal, 24).padding(.top, 18).padding(.bottom, 32)
@@ -94,7 +111,7 @@ struct SettingsView: View {
     private func groupLabel(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.5))
+            .foregroundStyle(Color.secondary)
             .padding(.bottom, 8).padding(.leading, 2)
     }
 

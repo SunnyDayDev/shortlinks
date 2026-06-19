@@ -27,7 +27,7 @@ struct CreateSheet: View {
 
                     field("Короткий адрес") {
                         HStack(spacing: 0) {
-                            Text("sl://link/").foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.45))
+                            Text("sl://link/").foregroundStyle(Color.secondary)
                                 .padding(.leading, 12)
                             TextField("имя", text: $model.form.slug)
                                 .textFieldStyle(.plain)
@@ -39,7 +39,7 @@ struct CreateSheet: View {
                                 HStack(spacing: 4) { Image(systemName: "arrow.clockwise"); Text("Случайный") }
                                     .font(.system(size: 12, weight: .semibold))
                                     .padding(.horizontal, 10).frame(height: 26)
-                                    .background(Color.black.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+                                    .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: 6))
                             }
                             .buttonStyle(.plain)
                             .padding(.trailing, 5)
@@ -70,9 +70,11 @@ struct CreateSheet: View {
 
                     field("Метки") {
                         VStack(alignment: .leading, spacing: 6) {
-                            FlowLayout(spacing: 6) {
-                                ForEach(model.form.tags, id: \.self) { tag in
-                                    TagChip(name: tag, onRemove: { model.removeTag(tag) })
+                            if !model.form.tags.isEmpty {
+                                FlowLayout(spacing: 6) {
+                                    ForEach(model.form.tags, id: \.self) { tag in
+                                        TagChip(name: tag, onRemove: { model.removeTag(tag) })
+                                    }
                                 }
                             }
                             TextField("Добавить метку…", text: $model.form.tagInput)
@@ -80,19 +82,20 @@ struct CreateSheet: View {
                                 .font(.system(size: 13))
                                 .onSubmit { model.addTag() }
                         }
-                        .padding(.horizontal, 10).padding(.vertical, 7)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 12).padding(.vertical, 8)
+                        .frame(maxWidth: .infinity, minHeight: 34, alignment: .leading)
                         .background(boxBg)
                     }
 
-                    Toggle(isOn: $model.form.passwordOn) {
+                    HStack(spacing: 14) {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Защитить паролем").font(.system(size: 13, weight: .medium))
                             Text("Запросить пароль перед переходом")
                                 .font(.system(size: 11.5)).foregroundStyle(Theme.secondaryText)
                         }
+                        Spacer()
+                        Toggle("", isOn: $model.form.passwordOn).labelsHidden().toggleStyle(.switch)
                     }
-                    .toggleStyle(.switch)
 
                     if model.form.passwordOn {
                         SecureField("Пароль", text: $model.form.password)
@@ -101,7 +104,7 @@ struct CreateSheet: View {
                             .background(boxBg)
                     }
                 }
-                .padding(.horizontal, 22).padding(.top, 14)
+                .padding(.horizontal, 22).padding(.top, 14).padding(.bottom, 18)
             }
 
             HStack {
@@ -121,12 +124,12 @@ struct CreateSheet: View {
     private var boxBg: some View {
         RoundedRectangle(cornerRadius: 8)
             .fill(Color(nsColor: .textBackgroundColor))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.black.opacity(0.18), lineWidth: 0.5))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Theme.cardBorder, lineWidth: 0.5))
     }
 
     private func field<Content: View>(_ label: String, @ViewBuilder _ content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(label).font(.system(size: 12, weight: .semibold)).foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.75))
+            Text(label).font(.system(size: 12, weight: .semibold)).foregroundStyle(Color.secondary)
             content()
         }
         .frame(maxWidth: .infinity, alignment: .leading)

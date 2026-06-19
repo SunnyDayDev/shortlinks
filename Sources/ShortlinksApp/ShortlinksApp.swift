@@ -2,8 +2,25 @@ import SwiftUI
 import AppKit
 import ShortlinksCore
 
+/// Обрабатывает `sl://` на уровне приложения, чтобы фоновый режим не выводил окно.
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func application(_ application: NSApplication, open urls: [URL]) {
+        var surfaceUI = false
+        for url in urls where AppModel.shared.handleIncoming(url) { surfaceUI = true }
+        if surfaceUI {
+            // Нужно взаимодействие (нет ссылки, пароль, недоступна) — показать приложение.
+            NSApp.activate(ignoringOtherApps: true)
+            AppModel.shared.openMainWindow?()
+        } else {
+            // Фоновый переход выполнен — не удерживать фокус на приложении.
+            NSApp.hide(nil)
+        }
+    }
+}
+
 @main
 struct ShortlinksApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
     @State private var model = AppModel.shared
 
     var body: some Scene {

@@ -43,13 +43,13 @@ struct SidebarView: View {
             footer
         }
         .frame(width: 240)
-        .background(Color(hex: 0xF0F0F3))
+        .background(Theme.sidebarBg)
     }
 
     private func sectionLabel(_ text: String) -> some View {
         Text(text)
             .font(.system(size: 11, weight: .bold))
-            .foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.45))
+            .foregroundStyle(Color.secondary)
             .padding(.horizontal, 20).padding(.top, 8).padding(.bottom, 6)
     }
 
@@ -84,7 +84,7 @@ struct SidebarView: View {
             Circle().fill(model.syncEnabled ? Theme.accent : Theme.activeAccent).frame(width: 6, height: 6)
             Text(model.syncEnabled ? "Синхронизируется через iCloud Drive" : "Хранится локально на этом Mac")
                 .font(.system(size: 11))
-                .foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.55))
+                .foregroundStyle(Color.secondary)
                 .lineLimit(2)
         }
         .padding(.horizontal, 18).padding(.vertical, 10)

@@ -41,7 +41,7 @@ struct LinkDetailView: View {
 
             HStack(spacing: 10) {
                 if status == .active {
-                    Button(action: { model.presentRedirect(for: link) }) {
+                    Button(action: { model.openLink(link) }) {
                         HStack(spacing: 7) {
                             Image(systemName: "arrow.right")
                             Text(Scheme.detect(link.target).openLabel)
@@ -57,7 +57,7 @@ struct LinkDetailView: View {
                         .font(.system(size: 13.5, weight: .semibold))
                         .foregroundStyle(Theme.secondaryText)
                         .padding(.horizontal, 18).frame(height: 36)
-                        .background(Color.black.opacity(0.05), in: RoundedRectangle(cornerRadius: 9))
+                        .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: 9))
                 }
                 Spacer()
                 Button(role: .destructive, action: { model.delete(id: link.id) }) {

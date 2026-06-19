@@ -51,6 +51,7 @@ targets:
       base:
         PRODUCT_NAME: Shortlinks
         PRODUCT_BUNDLE_IDENTIFIER: com.shortlinks.app
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         # Локальная подпись по умолчанию (ad-hoc) — собирается без аккаунта.

@@ -30,7 +30,7 @@ struct LinkRow: View {
             TargetIcon(target: link.target)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 0) {
-                    Text("sl://link/").foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.45))
+                    Text("sl://link/").foregroundStyle(Color.secondary)
                     Text(link.slug).foregroundStyle(.primary)
                 }
                 .font(.system(size: 13.5, design: .monospaced))
@@ -43,7 +43,7 @@ struct LinkRow: View {
 
                 Text(Format.subtitle(link))
                     .font(.system(size: 11.5))
-                    .foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.5))
+                    .foregroundStyle(Color.secondary)
 
                 if !link.tags.isEmpty {
                     FlowLayout(spacing: 5) {
@@ -56,7 +56,7 @@ struct LinkRow: View {
             StatusPill(status: link.status())
             Image(systemName: "chevron.right")
                 .font(.system(size: 12))
-                .foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.3))
+                .foregroundStyle(Color.secondary)
         }
         .padding(.horizontal, 14).padding(.vertical, 12)
         .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))

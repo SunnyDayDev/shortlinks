@@ -14,7 +14,7 @@ struct HowItWorksView: View {
                 .font(.system(size: 22, weight: .bold))
             Text("Вы создаёте адрес вида sl://link/имя. Когда его открывают, система ловит схему и перенаправляет на полную цель — приложение, файл или сайт.")
                 .font(.system(size: 14))
-                .foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.65))
+                .foregroundStyle(Color.secondary)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: 560, alignment: .leading)
                 .padding(.top, 8)
@@ -45,10 +45,10 @@ struct HowItWorksView: View {
             HStack(spacing: 14) {
                 Text("sl://link/demo")
                     .font(.system(size: 13, design: .monospaced)).foregroundStyle(Theme.accent)
-                Image(systemName: "arrow.right").foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.4))
+                Image(systemName: "arrow.right").foregroundStyle(Color.secondary)
                 Text("https://example.com/very/long/target?token=…")
                     .font(.system(size: 13, design: .monospaced))
-                    .foregroundStyle(Color(hex: 0x3C3C43, alpha: 0.75))
+                    .foregroundStyle(Color.secondary)
                     .lineLimit(1)
             }
             .padding(16)

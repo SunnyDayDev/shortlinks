@@ -12,6 +12,9 @@ enum Filter: Equatable {
 enum Screen { case library, settings, how }
 enum RedirectPhase { case ready, blocked, consumed }
 
+/// Режим перехода по короткой ссылке.
+enum RedirectMode: String { case instant, confirm }
+
 /// Форма создания ссылки.
 struct CreateForm {
     var target = ""
@@ -51,9 +54,13 @@ final class AppModel {
     var defPassword: Bool { didSet { Prefs.defPassword = defPassword } }
     var copyOnCreate: Bool { didSet { Prefs.copyOnCreate = copyOnCreate } }
     var deleteOnConsume: Bool { didSet { Prefs.deleteOnConsume = deleteOnConsume } }
+    var redirectMode: RedirectMode { didSet { Prefs.redirectMode = redirectMode } }
 
     var syncEnabled: Bool = StorageLocation.isSyncEnabled
     var iCloudAvailable: Bool { StorageLocation.isICloudAvailable }
+
+    /// Установлено сценой — открывает главное окно (для оверлея/подтверждения).
+    var openMainWindow: (() -> Void)?
 
     private var toastTask: Task<Void, Never>?
 
@@ -64,6 +71,7 @@ final class AppModel {
         defPassword = Prefs.defPassword
         copyOnCreate = Prefs.copyOnCreate
         deleteOnConsume = Prefs.deleteOnConsume
+        redirectMode = Prefs.redirectMode
         store.changeHandler = { [weak self] in self?.reload() }
         reload()
     }
@@ -209,18 +217,51 @@ final class AppModel {
 
     // MARK: - Redirect
 
-    func handleIncoming(_ url: URL) {
-        guard let slug = Scheme.slug(fromURL: url) else { return }
+    /// Точка входа для `sl://`. Возвращает `true`, если нужно показать окно/оверлей
+    /// (подтверждение, пароль, ошибка); `false` — ссылка открыта в фоне.
+    @discardableResult
+    func handleIncoming(_ url: URL) -> Bool {
+        guard let slug = Scheme.slug(fromURL: url) else { return false }
         reload()
-        redirectSlug = slug
         redirectPasswordInput = ""
         guard let link = links.first(where: { $0.slug == slug }) else {
+            redirectSlug = slug
             redirectNotFound = true
             redirectPhase = .blocked
-            return
+            return true
         }
+        return route(link)
+    }
+
+    /// Открыть ссылку из интерфейса (кнопка «Открыть» в карточке).
+    func openLink(_ link: Link) { _ = route(link) }
+
+    /// Решает: открыть в фоне или показать оверлей. Пароль, недоступная и
+    /// ненайденная ссылка всегда требуют оверлей.
+    @discardableResult
+    private func route(_ link: Link) -> Bool {
+        redirectPasswordInput = ""
         redirectNotFound = false
-        redirectPhase = link.status() == .active ? .ready : .blocked
+        guard link.status() == .active else {
+            redirectSlug = link.slug
+            redirectPhase = .blocked
+            return true
+        }
+        if link.isProtected || redirectMode == .confirm {
+            redirectSlug = link.slug
+            redirectPhase = .ready
+            return true
+        }
+        performOpen(slug: link.slug)
+        return false
+    }
+
+    /// Фоновое открытие: потребление + системное открытие цели, без оверлея.
+    private func performOpen(slug: String) {
+        guard let opened = store.consume(slug: slug, deleteOnConsume: deleteOnConsume) else { return }
+        Opener.open(opened.target)
+        reload()
+        flashToast(opened.kind == .once ? "Открыто · ссылка сгорела" : "Переход выполнен")
     }
 
     func confirmRedirect() {
@@ -244,14 +285,6 @@ final class AppModel {
             redirectSlug = nil
             flashToast("Переход выполнен")
         }
-    }
-
-    /// Показать оверлей перехода для существующей ссылки (кнопка «Открыть» в карточке).
-    func presentRedirect(for link: Link) {
-        redirectSlug = link.slug
-        redirectPasswordInput = ""
-        redirectNotFound = false
-        redirectPhase = link.status() == .active ? .ready : .blocked
     }
 
     func closeRedirect() { redirectSlug = nil }
@@ -323,5 +356,9 @@ enum Prefs {
     static var deleteOnConsume: Bool {
         get { d.bool(forKey: "deleteOnConsume") }
         set { d.set(newValue, forKey: "deleteOnConsume") }
+    }
+    static var redirectMode: RedirectMode {
+        get { RedirectMode(rawValue: d.string(forKey: "redirectMode") ?? "instant") ?? .instant }
+        set { d.set(newValue.rawValue, forKey: "redirectMode") }
     }
 }

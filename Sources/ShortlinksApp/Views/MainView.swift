@@ -33,10 +33,7 @@ struct MainView: View {
         }
         .animation(.easeOut(duration: 0.18), value: model.toast)
         .sheet(isPresented: $model.showCreate) { CreateSheet() }
-        .onOpenURL { url in
-            model.handleIncoming(url)
-            openWindow(id: "main")
-        }
+        .onAppear { model.openMainWindow = { openWindow(id: "main") } }
     }
 
     private var content: some View {
@@ -70,17 +67,19 @@ struct MainView: View {
                 .lineLimit(1)
                 .frame(maxWidth: 360, alignment: .leading)
             Spacer()
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.secondaryText)
-                TextField("Поиск", text: $model.query)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 13))
+            if model.screen == .library && model.selectedLink == nil {
+                HStack(spacing: 6) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.secondaryText)
+                    TextField("Поиск", text: $model.query)
+                        .textFieldStyle(.plain)
+                        .font(.system(size: 13))
+                }
+                .padding(.horizontal, 10)
+                .frame(width: 200, height: 30)
+                .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: 7))
             }
-            .padding(.horizontal, 10)
-            .frame(width: 200, height: 30)
-            .background(Color.black.opacity(0.05), in: RoundedRectangle(cornerRadius: 7))
 
             Button(action: { model.openCreate() }) {
                 HStack(spacing: 5) {
