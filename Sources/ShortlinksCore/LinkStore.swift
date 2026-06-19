@@ -34,8 +34,14 @@ public final class LinkStore {
         return d
     }()
 
-    public init(watch: Bool = true) {
-        self.fileURL = StorageLocation.current()
+    public convenience init(watch: Bool = true) {
+        self.init(fileURL: StorageLocation.current(), watch: watch)
+    }
+
+    /// Инициализация с явным файлом хранилища — для тестов (временный файл) и
+    /// специальных случаев. Поведение над файлом идентично основному init.
+    public init(fileURL: URL, watch: Bool = false) {
+        self.fileURL = fileURL
         ensureDirectory()
         if watch { startWatching() }
     }

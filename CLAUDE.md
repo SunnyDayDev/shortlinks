@@ -10,6 +10,8 @@
 xcodegen generate                                   # пересобрать .xcodeproj из project.yml
 xcodebuild -project Shortlinks.xcodeproj -scheme ShortlinksApp build
 xcodebuild -project Shortlinks.xcodeproj -scheme shortlinks-cli -configuration Release build
+xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
+  -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO   # юнит-тесты ShortlinksCore
 ```
 
 `Shortlinks.xcodeproj` генерируется и НЕ коммитится — правьте `project.yml`, затем
@@ -28,6 +30,20 @@ xcodebuild -project Shortlinks.xcodeproj -scheme shortlinks-cli -configuration R
   app-таргета) — отдельная установка не нужна. Доступность из терминала включается из
   приложения (Настройки → «Командная строка» или онбординг при первом запуске): симлинк
   на вложенный бинарь в `~/.local/bin`. Логика — `CLIInstaller` в ShortlinksCore.
+- **ShortlinksCoreTests** (`Tests/ShortlinksCoreTests`) — юнит-тесты доменной логики
+  (Slug/Scheme/Password/Link/ConflictMerge/Format/LinkStore/CLIInstaller). `LinkStore`
+  тестируется через `init(fileURL:watch:)` во временном файле. Новые тест-файлы требуют
+  `xcodegen generate` (xcodegen ведёт явный список файлов).
+
+## Тесты и CI
+
+- Локально: `xcodebuild test -scheme ShortlinksCoreTests … CODE_SIGNING_ALLOWED=NO`
+  (см. Команды). Подпись отключаем — самоподписанный серт для тест-бандла не нужен.
+- CI: `.github/workflows/ci.yml` на `macos-14` ставит XcodeGen, генерирует проект и
+  прогоняет `ShortlinksCoreTests` при PR в `main` и push в `main`. GUI-приложение на CI
+  не собирается (нужен самоподписанный сертификат) — проверяется логика ядра.
+- Required status checks технически не enforce'ятся (free private, как и branch
+  protection) — красный CI блокирует мерж по договорённости.
 
 ## Ключевые решения (см. `openspec/changes/bootstrap-shortlinks/design.md`)
 
