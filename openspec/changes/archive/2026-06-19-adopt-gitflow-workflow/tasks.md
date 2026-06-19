@@ -7,7 +7,7 @@
 ## 2. Синхронизировать спеку
 
 - [x] 2.1 Прогнать `openspec validate --specs` для `dev-workflow`
-- [ ] 2.2 Синхронизировать дельту `dev-workflow` в `openspec/specs/` (`/opsx:sync`) при завершении
+- [x] 2.2 Синхронизировать дельту `dev-workflow` в `openspec/specs/` (`/opsx:sync`) при завершении
 
 ## 3. Опционально: защита ветки
 
