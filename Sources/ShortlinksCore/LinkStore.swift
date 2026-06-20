@@ -95,6 +95,22 @@ public final class LinkStore {
         mutate { links in links.removeAll { $0.id == id } }
     }
 
+    /// Массовое удаление по набору `id` одной координированной записью.
+    public func delete(ids: Set<String>) {
+        guard !ids.isEmpty else { return }
+        mutate { links in links.removeAll { ids.contains($0.id) } }
+    }
+
+    /// Ручная деактивация/активация ссылки: проставляет или снимает `disabledAt`.
+    @discardableResult
+    public func setDisabled(id: String, _ disabled: Bool, now: Date = Date()) -> Link? {
+        mutate { links in
+            guard let idx = links.firstIndex(where: { $0.id == id }) else { return nil }
+            links[idx].disabledAt = disabled ? now : nil
+            return links[idx]
+        }
+    }
+
     @discardableResult
     public func delete(slug: String) -> Bool {
         mutate { links in

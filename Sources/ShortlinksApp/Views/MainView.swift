@@ -4,6 +4,7 @@ import ShortlinksCore
 struct MainView: View {
     @Environment(AppModel.self) private var model
     @Environment(\.openWindow) private var openWindow
+    @State private var showBulkDeleteConfirm = false
 
     var body: some View {
         @Bindable var model = model
@@ -50,9 +51,53 @@ struct MainView: View {
             toolbar
             Divider()
             ScrollView { contentBody }
+            if isListVisible && model.editing {
+                bulkBar
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .textBackgroundColor))
+        .confirmationDialog(
+            "Удалить \(model.selection.count) \(Format.plural(model.selection.count, ["ссылку", "ссылки", "ссылок"]))?",
+            isPresented: $showBulkDeleteConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Удалить", role: .destructive) { model.deleteSelected() }
+            Button("Отмена", role: .cancel) {}
+        }
+    }
+
+    /// Виден ли список ссылок (а не карточка/настройки).
+    private var isListVisible: Bool {
+        model.screen == .library && model.selectedLink == nil
+    }
+
+    /// Цвет иконки-переключателя режима в тулбаре.
+    private var editIconColor: Color {
+        guard model.editing else { return Theme.accent }
+        return model.canDeleteSelected ? Color(hex: 0xC0392B) : Theme.secondaryText
+    }
+
+    private var bulkBar: some View {
+        HStack(spacing: 12) {
+            Text("Выбрано: \(model.selection.count)")
+                .font(.system(size: 13))
+                .foregroundStyle(Theme.secondaryText)
+            Spacer()
+            Button(action: { withAnimation(.easeInOut(duration: 0.22)) { model.toggleEditing() } }) {
+                Text("Готово")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(Theme.accent)
+                    .padding(.horizontal, 14).frame(height: 30)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 48)
+        .background(.bar)
+        .overlay(Divider(), alignment: .top)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
     @ViewBuilder
@@ -88,6 +133,26 @@ struct MainView: View {
                 .padding(.horizontal, 10)
                 .frame(width: 200, height: 30)
                 .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: 7))
+
+                if !model.filteredLinks.isEmpty {
+                    Button(action: {
+                        if model.editing {
+                            showBulkDeleteConfirm = true
+                        } else {
+                            withAnimation(.easeInOut(duration: 0.22)) { model.toggleEditing() }
+                        }
+                    }) {
+                        Image(systemName: model.editing ? "trash" : "square.and.pencil")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundStyle(editIconColor)
+                            .frame(width: 30, height: 30)
+                            .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: 7))
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(model.editing && !model.canDeleteSelected)
+                    .help(model.editing ? "Удалить выбранные" : "Выбрать несколько")
+                }
             }
 
             Button(action: { model.openCreate() }) {

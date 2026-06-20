@@ -38,6 +38,10 @@ final class AppModel {
     var filter: Filter = .all
     var query = ""
     var selectedId: String?
+
+    // Режим редактирования списка (множественный выбор)
+    var editing = false
+    var selection: Set<String> = []
     var showCreate = false
     var form = CreateForm()
     var toast: String?
@@ -154,9 +158,11 @@ final class AppModel {
 
     // MARK: - Navigation
 
-    func setFilter(_ f: Filter) { screen = .library; filter = f; selectedId = nil }
-    func goScreen(_ s: Screen) { screen = s; selectedId = nil }
+    func setFilter(_ f: Filter) { screen = .library; filter = f; selectedId = nil; exitEditing() }
+    func goScreen(_ s: Screen) { screen = s; selectedId = nil; exitEditing() }
     func openDetail(_ id: String) { screen = .library; selectedId = id }
+
+    private func exitEditing() { editing = false; selection.removeAll() }
     func back() { selectedId = nil }
 
     // MARK: - Create
@@ -218,8 +224,47 @@ final class AppModel {
 
     func delete(id: String) {
         store.delete(id: id)
+        withAnimation(.easeInOut(duration: 0.25)) {
+            reload()
+            if selectedId == id { selectedId = nil }
+        }
+    }
+
+    // MARK: - Режим редактирования (множественный выбор)
+
+    func toggleEditing() {
+        editing.toggle()
+        if !editing { selection.removeAll() }
+    }
+
+    func toggleSelect(_ id: String) {
+        if selection.contains(id) { selection.remove(id) } else { selection.insert(id) }
+    }
+
+    var canDeleteSelected: Bool { !selection.isEmpty }
+
+    func deleteSelected() {
+        let ids = selection
+        guard !ids.isEmpty else { return }
+        store.delete(ids: ids)
+        withAnimation(.easeInOut(duration: 0.25)) {
+            reload()
+            selection.removeAll()
+            editing = false
+            if let sel = selectedId, ids.contains(sel) { selectedId = nil }
+        }
+    }
+
+    // MARK: - Деактивация / активация
+
+    func deactivate(id: String) {
+        store.setDisabled(id: id, true)
         reload()
-        if selectedId == id { selectedId = nil }
+    }
+
+    func activate(id: String) {
+        store.setDisabled(id: id, false)
+        reload()
     }
 
     // MARK: - Redirect

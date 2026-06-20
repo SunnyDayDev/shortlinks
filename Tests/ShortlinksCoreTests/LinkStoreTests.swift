@@ -85,4 +85,45 @@ final class LinkStoreTests: XCTestCase {
     func testConsumeMissingReturnsNil() {
         XCTAssertNil(store.consume(slug: "nope", deleteOnConsume: false, now: t0))
     }
+
+    func testDeleteByIds() {
+        // Уникальные id: Link.make выводит id из времени, а здесь оно общее (t0).
+        var a = make("a"); a.id = "id-a"
+        var b = make("b"); b.id = "id-b"
+        var c = make("c"); c.id = "id-c"
+        store.add(a); store.add(b); store.add(c)
+        store.delete(ids: [a.id, c.id])
+        let remaining = store.load()
+        XCTAssertEqual(remaining.count, 1)
+        XCTAssertEqual(remaining.first?.slug, "b")
+    }
+
+    func testDeleteByEmptyIdsIsNoop() {
+        store.add(make("a"))
+        store.delete(ids: [])
+        XCTAssertEqual(store.load().count, 1)
+    }
+
+    func testSetDisabledTogglesStatus() {
+        let link = make("a")
+        store.add(link)
+        store.setDisabled(id: link.id, true, now: t0)
+        XCTAssertEqual(store.resolve(slug: "a")?.status(now: t0), .disabled)
+        XCTAssertNotNil(store.resolve(slug: "a")?.disabledAt)
+
+        store.setDisabled(id: link.id, false, now: t0)
+        XCTAssertEqual(store.resolve(slug: "a")?.status(now: t0), .active)
+        XCTAssertNil(store.resolve(slug: "a")?.disabledAt)
+    }
+
+    func testDisabledLinkCannotBeConsumed() {
+        let link = make("a", kind: .reuse)
+        store.add(link)
+        store.setDisabled(id: link.id, true, now: t0)
+        XCTAssertNil(store.consume(slug: "a", deleteOnConsume: false, now: t0))
+    }
+
+    func testSetDisabledMissingReturnsNil() {
+        XCTAssertNil(store.setDisabled(id: "missing", true, now: t0))
+    }
 }

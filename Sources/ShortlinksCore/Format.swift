@@ -22,6 +22,7 @@ public enum Format {
         switch status {
         case .active: return "Активна"
         case .viewed: return "Просмотрена"
+        case .disabled: return "Деактивирована"
         case .expired: return "Истекла"
         }
     }
@@ -51,6 +52,8 @@ public enum Format {
             return "\(kind) · \(opensText(link.opens))"
         case .viewed:
             return "\(kind) · потреблена"
+        case .disabled:
+            return "\(kind) · деактивирована"
         case .expired:
             return "\(kind) · срок истёк"
         }

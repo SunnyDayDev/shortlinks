@@ -21,6 +21,37 @@ final class LinkTests: XCTestCase {
         XCTAssertEqual(link.status(now: t0), .viewed)
     }
 
+    func testStatusDisabledWhenDisabledAtSet() {
+        var link = Link.make(target: "https://a", slug: "s", kind: .reuse, lifetime: .never, now: t0)
+        link.disabledAt = t0
+        XCTAssertEqual(link.status(now: t0), .disabled)
+    }
+
+    func testStatusPriorityViewedOverDisabledOverExpired() {
+        // Деактивация имеет приоритет над истечением.
+        var expiredAndDisabled = Link.make(target: "x", slug: "s", kind: .reuse, lifetime: .h1, now: t0)
+        expiredAndDisabled.disabledAt = t0
+        XCTAssertEqual(expiredAndDisabled.status(now: t0.addingTimeInterval(7200)), .disabled)
+
+        // Потребление одноразовой имеет приоритет над деактивацией.
+        var viewedAndDisabled = Link.make(target: "x", slug: "s", kind: .once, lifetime: .never, now: t0)
+        viewedAndDisabled.consumedAt = t0
+        viewedAndDisabled.disabledAt = t0
+        XCTAssertEqual(viewedAndDisabled.status(now: t0), .viewed)
+    }
+
+    func testDecodesLegacyJSONWithoutDisabledAt() throws {
+        // Старый формат записи без поля disabledAt читается как не деактивированная.
+        let json = """
+        {"id":"n1","slug":"s","target":"https://a","kind":"reuse","opens":0,
+         "createdAt":"1970-01-12T13:46:40Z","tags":[]}
+        """
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        let link = try decoder.decode(Link.self, from: Data(json.utf8))
+        XCTAssertNil(link.disabledAt)
+        XCTAssertEqual(link.status(now: t0), .active)
+    }
+
     func testMakeComputesExpiresFromLifetime() {
         let link = Link.make(target: "https://a", slug: "s", kind: .once, lifetime: .h24, now: t0)
         XCTAssertEqual(link.expiresAt, t0.addingTimeInterval(86_400))

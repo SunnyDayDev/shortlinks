@@ -11,22 +11,59 @@ struct LinkListView: View {
         } else {
             VStack(spacing: 8) {
                 ForEach(links) { link in
-                    LinkRow(link: link)
-                        .contentShape(Rectangle())
-                        .onTapGesture { model.openDetail(link.id) }
+                    row(link)
                 }
             }
             .padding(.horizontal, 16)
             .padding(.top, 14).padding(.bottom, 24)
         }
     }
+
+    @ViewBuilder
+    private func row(_ link: Link) -> some View {
+        let editing = model.editing
+        LinkRow(link: link, editing: editing, selected: model.selection.contains(link.id))
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if editing { model.toggleSelect(link.id) } else { model.openDetail(link.id) }
+            }
+            .contextMenu { if !editing { contextMenu(link) } }
+            .transition(.move(edge: .trailing).combined(with: .opacity))
+    }
+
+    @ViewBuilder
+    private func contextMenu(_ link: Link) -> some View {
+        let status = link.status()
+        if status == .active {
+            Button("Открыть") { model.openLink(link) }
+        }
+        Button("Скопировать адрес") { model.copy(link.fullURL) }
+        // Активировать сгоревшую (viewed) ссылку нечего — пункт только для остальных.
+        if status != .viewed {
+            if status == .disabled {
+                Button("Активировать") { model.activate(id: link.id) }
+            } else {
+                Button("Деактивировать") { model.deactivate(id: link.id) }
+            }
+        }
+        Divider()
+        Button("Удалить", role: .destructive) { model.delete(id: link.id) }
+    }
 }
 
 struct LinkRow: View {
     let link: Link
+    var editing = false
+    var selected = false
 
     var body: some View {
         HStack(spacing: 13) {
+            if editing {
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 18))
+                    .foregroundStyle(selected ? Theme.accent : Color.secondary)
+                    .transition(.move(edge: .leading).combined(with: .opacity))
+            }
             TargetIcon(target: link.target)
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 0) {
@@ -54,9 +91,12 @@ struct LinkRow: View {
             }
             Spacer(minLength: 6)
             StatusPill(status: link.status())
-            Image(systemName: "chevron.right")
-                .font(.system(size: 12))
-                .foregroundStyle(Color.secondary)
+            if !editing {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Color.secondary)
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
+            }
         }
         .padding(.horizontal, 14).padding(.vertical, 12)
         .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))

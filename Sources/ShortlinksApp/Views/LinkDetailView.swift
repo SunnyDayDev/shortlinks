@@ -83,7 +83,7 @@ struct LinkDetailView: View {
             Divider()
             infoRow("Переходов", Format.opensText(link.opens))
             Divider()
-            infoRow("Срок действия", status == .active ? Format.expiresText(link) : (status == .viewed ? "Просмотрена" : "Истёк"))
+            infoRow("Срок действия", expiryText(link, status: status))
             Divider()
             infoRow("Пароль", link.isProtected ? "Включён" : "Нет")
             if !link.tags.isEmpty {
@@ -113,6 +113,14 @@ struct LinkDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(.horizontal, 16).padding(.vertical, 13)
+    }
+
+    private func expiryText(_ link: Link, status: LinkStatus) -> String {
+        switch status {
+        case .active, .disabled: return Format.expiresText(link)
+        case .viewed: return "Просмотрена"
+        case .expired: return "Истёк"
+        }
     }
 
     private func created(_ link: Link) -> String {
