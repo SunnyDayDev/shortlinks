@@ -10,6 +10,7 @@ public enum LinkKind: String, Codable, Sendable, CaseIterable {
 public enum LinkStatus: String, Sendable {
     case active   // доступна для перехода
     case viewed   // одноразовая, уже потреблена («сгорела»)
+    case disabled // вручную деактивирована пользователем
     case expired  // истёк срок действия
 }
 
@@ -43,6 +44,7 @@ public struct Link: Codable, Identifiable, Sendable, Hashable {
     public var consumedAt: Date?      // проставляется при потреблении одноразовой
     public var passwordHash: String?  // формат "salt:hex(sha256(salt+password))"
     public var tags: [String]
+    public var disabledAt: Date?      // момент ручной деактивации; nil = активна
 
     public init(
         id: String,
@@ -54,7 +56,8 @@ public struct Link: Codable, Identifiable, Sendable, Hashable {
         expiresAt: Date? = nil,
         consumedAt: Date? = nil,
         passwordHash: String? = nil,
-        tags: [String] = []
+        tags: [String] = [],
+        disabledAt: Date? = nil
     ) {
         self.id = id
         self.slug = slug
@@ -66,11 +69,14 @@ public struct Link: Codable, Identifiable, Sendable, Hashable {
         self.consumedAt = consumedAt
         self.passwordHash = passwordHash
         self.tags = tags
+        self.disabledAt = disabledAt
     }
 
-    /// Статус относительно момента `now`.
+    /// Статус относительно момента `now`. Приоритет: потреблена → деактивирована →
+    /// истекла → активна.
     public func status(now: Date = Date()) -> LinkStatus {
         if consumedAt != nil { return .viewed }
+        if disabledAt != nil { return .disabled }
         if let expiresAt, expiresAt <= now { return .expired }
         return .active
     }

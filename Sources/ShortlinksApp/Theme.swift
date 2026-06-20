@@ -54,6 +54,7 @@ enum Theme {
         switch status {
         case .active: return (Color(hex: 0x28A55F, alpha: 0.16), Color.dyn(0x1D7A4A, 0x5FD191))
         case .viewed: return (Color.primary.opacity(0.08), Color.secondary)
+        case .disabled: return (Color(hex: 0xE8A33D, alpha: 0.18), Color.dyn(0xB5791A, 0xF0B860))
         case .expired: return (Color(hex: 0xD2372D, alpha: 0.16), Color.dyn(0xC0392B, 0xFF6F62))
         }
     }
