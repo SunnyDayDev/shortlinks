@@ -19,10 +19,10 @@ public enum TargetType: String, Sendable {
 
     public var openLabel: String {
         switch self {
-        case .web: return "Открыть в браузере"
-        case .file: return "Открыть файл"
-        case .app: return "Открыть в приложении"
-        case .text: return "Показать содержимое"
+        case .web: return Strings.Target.web
+        case .file: return Strings.Target.file
+        case .app: return Strings.Target.app
+        case .text: return Strings.Target.text
         }
     }
 }

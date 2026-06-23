@@ -8,12 +8,12 @@ struct SettingsView: View {
     var body: some View {
         @Bindable var model = model
         VStack(alignment: .leading, spacing: 0) {
-            groupLabel("РАЗРЕШЕНИЕ ССЫЛОК")
+            groupLabel(Strings.Settings.sectionHandler)
             SettingsCard {
                 SettingsRow {
                     VStack(alignment: .leading, spacing: Spacing.s4) {
-                        Text("Обработчик схемы sl://").font(Typography.bodyEmphasis)
-                        Text("Приложение зарегистрировано как обработчик ссылок для этого Mac.")
+                        Text(Strings.Settings.handlerTitle).font(Typography.bodyEmphasis)
+                        Text(Strings.Settings.handlerHint)
                             .font(Typography.caption).foregroundStyle(Theme.textSecondary)
                     }
                     Spacer()
@@ -22,60 +22,60 @@ struct SettingsView: View {
                 }
             }
 
-            groupLabel("ПЕРЕХОД ПО ССЫЛКЕ").padding(.top, Spacing.s22)
+            groupLabel(Strings.Settings.sectionRedirect).padding(.top, Spacing.s22)
             SettingsCard {
                 SettingsRow {
                     VStack(alignment: .leading, spacing: Spacing.s4) {
-                        Text("Режим перехода").font(Typography.bodyMedium)
-                        Text("«Сразу» открывает цель в фоне без диалога. Защищённые паролем и недоступные ссылки всегда показывают подтверждение.")
+                        Text(Strings.Settings.redirectTitle).font(Typography.bodyMedium)
+                        Text(Strings.Settings.redirectHint)
                             .font(Typography.caption).foregroundStyle(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     Spacer(minLength: Spacing.s12)
                     Picker("", selection: $model.redirectMode) {
-                        Text("Сразу").tag(RedirectMode.instant)
-                        Text("С подтверждением").tag(RedirectMode.confirm)
+                        Text(Strings.Settings.redirectInstant).tag(RedirectMode.instant)
+                        Text(Strings.Settings.redirectConfirm).tag(RedirectMode.confirm)
                     }.pickerStyle(.segmented).labelsHidden().frame(width: Size.pickerWidth)
                 }
             }
 
-            groupLabel("ПО УМОЛЧАНИЮ ДЛЯ НОВЫХ ССЫЛОК").padding(.top, Spacing.s22)
+            groupLabel(Strings.Settings.sectionDefaults).padding(.top, Spacing.s22)
             SettingsCard {
                 SettingsRow {
-                    Text("Тип ссылки").font(Typography.bodyMedium)
+                    Text(Strings.Settings.defaultsType).font(Typography.bodyMedium)
                     Spacer()
                     Picker("", selection: $model.defKind) {
-                        Text("Одноразовая").tag(LinkKind.once)
-                        Text("Многоразовая").tag(LinkKind.reuse)
+                        Text(Strings.Kind.once).tag(LinkKind.once)
+                        Text(Strings.Kind.reuse).tag(LinkKind.reuse)
                     }.pickerStyle(.segmented).labelsHidden().frame(width: Size.pickerWidth)
                 }
                 Divider()
                 SettingsRow {
-                    Text("Срок действия").font(Typography.bodyMedium)
+                    Text(Strings.Common.lifetimeTitle).font(Typography.bodyMedium)
                     Spacer()
                     Picker("", selection: $model.defLifetime) {
-                        Text("1 ч").tag(Lifetime.h1)
-                        Text("24 ч").tag(Lifetime.h24)
-                        Text("7 дн").tag(Lifetime.d7)
-                        Text("Без срока").tag(Lifetime.never)
+                        Text(Strings.LifetimeLabel.h1).tag(Lifetime.h1)
+                        Text(Strings.LifetimeLabel.h24).tag(Lifetime.h24)
+                        Text(Strings.LifetimeLabel.d7).tag(Lifetime.d7)
+                        Text(Strings.LifetimeLabel.never).tag(Lifetime.never)
                     }.pickerStyle(.segmented).labelsHidden().frame(width: Size.pickerWideWidth)
                 }
                 Divider()
-                SettingsToggleRow(title: "Запрашивать пароль", isOn: $model.defPassword)
+                SettingsToggleRow(title: Strings.Settings.defaultsAskPassword, isOn: $model.defPassword)
                 Divider()
-                SettingsToggleRow(title: "Копировать после создания", isOn: $model.copyOnCreate)
+                SettingsToggleRow(title: Strings.Settings.defaultsCopyOnCreate, isOn: $model.copyOnCreate)
                 Divider()
-                SettingsToggleRow(title: "Удалять одноразовую после перехода", isOn: $model.deleteOnConsume)
+                SettingsToggleRow(title: Strings.Settings.defaultsDeleteOnConsume, isOn: $model.deleteOnConsume)
             }
 
-            groupLabel("СИНХРОНИЗАЦИЯ").padding(.top, Spacing.s22)
+            groupLabel(Strings.Settings.sectionSync).padding(.top, Spacing.s22)
             SettingsCard {
                 SettingsRow {
                     VStack(alignment: .leading, spacing: Spacing.s4) {
-                        Text("Синхронизация через iCloud Drive").font(Typography.bodyEmphasis)
+                        Text(Strings.Settings.syncTitle).font(Typography.bodyEmphasis)
                         Text(model.iCloudAvailable
-                             ? "Ссылки хранятся в одном файле в вашем iCloud Drive и синхронизируются между устройствами."
-                             : "iCloud Drive недоступен на этом Mac.")
+                             ? Strings.Settings.syncAvailable
+                             : Strings.Settings.syncUnavailable)
                             .font(Typography.caption).foregroundStyle(Theme.textSecondary)
                     }
                     Spacer()
@@ -85,11 +85,11 @@ struct SettingsView: View {
                 }
             }
 
-            groupLabel("КОМАНДНАЯ СТРОКА").padding(.top, Spacing.s22)
+            groupLabel(Strings.Settings.sectionCLI).padding(.top, Spacing.s22)
             SettingsCard {
                 SettingsRow {
                     VStack(alignment: .leading, spacing: Spacing.s4) {
-                        Text("Команда shortlinks в терминале").font(Typography.bodyEmphasis)
+                        Text(Strings.Settings.cliTitle).font(Typography.bodyEmphasis)
                         cliStatusLine
                     }
                     Spacer(minLength: Spacing.s12)
@@ -101,12 +101,12 @@ struct SettingsView: View {
                 }
             }
 
-            groupLabel("ПРИВАТНОСТЬ").padding(.top, Spacing.s22)
+            groupLabel(Strings.Settings.sectionPrivacy).padding(.top, Spacing.s22)
             HStack(alignment: .top, spacing: Spacing.s12) {
-                IconTile(systemName: "lock.fill", tint: Theme.activeAccent, size: Size.tileLg, weight: .semibold, radius: Radius.md)
+                IconTile(systemName: Icons.Status.privacy, tint: Theme.activeAccent, size: Size.tileLg, weight: .semibold, radius: Radius.md)
                 VStack(alignment: .leading, spacing: Spacing.s4) {
-                    Text("Приватность по умолчанию").font(Typography.bodyEmphasis)
-                    Text("Ссылки и их цели хранятся только на этом Mac. При включённой синхронизации они идут через ваш личный iCloud Drive — без аккаунтов сервиса и сторонних серверов.")
+                    Text(Strings.Settings.privacyTitle).font(Typography.bodyEmphasis)
+                    Text(Strings.Settings.privacyBody)
                         .font(Typography.caption).foregroundStyle(Theme.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -128,14 +128,14 @@ struct SettingsView: View {
     private var cliStatusLine: some View {
         switch model.cliStatus {
         case .installed(let path):
-            Text("Установлен · \(path)")
+            Text(Strings.Settings.cliInstalled(path))
                 .font(Typography.caption).foregroundStyle(Theme.activeAccent)
         case .notInstalled:
-            Text("Не установлен. Установите, чтобы вызывать shortlinks из терминала.")
+            Text(Strings.Settings.cliNotInstalled)
                 .font(Typography.caption).foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
         case .conflict(let reason):
-            Text("Конфликт: \(reason)")
+            Text(Strings.Settings.cliConflict(reason))
                 .font(Typography.caption).foregroundStyle(Theme.destructive)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -145,16 +145,16 @@ struct SettingsView: View {
     private var cliActionButton: some View {
         switch model.cliStatus {
         case .installed:
-            Button("Удалить CLI") { model.uninstallCLI() }
+            Button(Strings.Settings.cliUninstall) { model.uninstallCLI() }
         case .notInstalled, .conflict:
-            Button("Установить CLI") { model.installCLI() }
+            Button(Strings.Settings.cliInstall) { model.installCLI() }
                 .buttonStyle(.borderedProminent).tint(Theme.accent)
         }
     }
 
     private var cliPathHint: some View {
         VStack(alignment: .leading, spacing: Spacing.s6) {
-            Text("Каталог ~/.local/bin не в PATH. Добавьте строку в профиль шелла (например ~/.zshrc):")
+            Text(Strings.Settings.cliPathHint)
                 .font(Typography.caption).foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
             HStack {
@@ -165,7 +165,7 @@ struct SettingsView: View {
                 Button {
                     model.copy(model.cliPathExportLine)
                 } label: {
-                    Image(systemName: "doc.on.doc")
+                    Image(systemName: Icons.Action.copyPath)
                 }
                 .buttonStyle(.plain).foregroundStyle(Theme.accent)
             }

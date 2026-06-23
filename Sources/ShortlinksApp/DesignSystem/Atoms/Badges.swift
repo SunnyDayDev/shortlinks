@@ -23,7 +23,7 @@ struct TagChip: View {
             Text("#\(name)")
             if let onRemove {
                 Button(action: onRemove) {
-                    Image(systemName: "xmark")
+                    Image(systemName: Icons.Action.removeTag)
                         .font(.system(size: 8, weight: .bold))
                 }
                 .buttonStyle(.plain)

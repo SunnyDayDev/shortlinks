@@ -1,18 +1,19 @@
 import SwiftUI
+import ShortlinksCore
 
 struct HowItWorksView: View {
     private let steps = [
-        ("1", "Создаёте ссылку", "Указываете цель и получаете короткий адрес sl://link/…", Theme.accent),
-        ("2", "Делитесь", "Отправляете адрес любым способом — он короткий и не раскрывает цель.", Theme.accent),
-        ("3", "Переход", "Система открывает приложение или браузер по сохранённой цели.", Theme.accent),
-        ("4", "Сгорает", "Одноразовая ссылка становится недоступной после первого перехода.", Theme.onceAccent),
+        ("1", Strings.HowItWorks.step1Title, Strings.HowItWorks.step1Body, Theme.accent),
+        ("2", Strings.HowItWorks.step2Title, Strings.HowItWorks.step2Body, Theme.accent),
+        ("3", Strings.HowItWorks.step3Title, Strings.HowItWorks.step3Body, Theme.accent),
+        ("4", Strings.HowItWorks.step4Title, Strings.HowItWorks.step4Body, Theme.onceAccent),
     ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Короткая ссылка, которая живёт на вашем Mac")
+            Text(Strings.HowItWorks.title)
                 .font(Typography.display)
-            Text("Вы создаёте адрес вида sl://link/имя. Когда его открывают, система ловит схему и перенаправляет на полную цель — приложение, файл или сайт.")
+            Text(Strings.HowItWorks.intro)
                 .font(Typography.bodyLarge)
                 .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -44,7 +45,7 @@ struct HowItWorksView: View {
             HStack(spacing: Spacing.s14) {
                 Text("sl://link/demo")
                     .font(Typography.mono).foregroundStyle(Theme.accent)
-                Image(systemName: "arrow.right").foregroundStyle(Theme.textSecondary)
+                Image(systemName: Icons.Action.redirect).foregroundStyle(Theme.textSecondary)
                 Text("https://example.com/very/long/target?token=…")
                     .font(Typography.mono)
                     .foregroundStyle(Theme.textSecondary)

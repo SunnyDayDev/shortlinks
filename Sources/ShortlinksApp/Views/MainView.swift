@@ -33,11 +33,11 @@ struct MainView: View {
         }
         .animation(.easeOut(duration: 0.18), value: model.toast)
         .sheet(isPresented: $model.showCreate) { CreateSheet() }
-        .alert("Установить команду «shortlinks»?", isPresented: $model.showCLIOnboarding) {
-            Button("Установить") { model.acceptCLIOnboarding() }
-            Button("Не сейчас", role: .cancel) { model.declineCLIOnboarding() }
+        .alert(Strings.CLIOnboarding.title, isPresented: $model.showCLIOnboarding) {
+            Button(Strings.Common.install) { model.acceptCLIOnboarding() }
+            Button(Strings.Common.notNow, role: .cancel) { model.declineCLIOnboarding() }
         } message: {
-            Text("Команда станет доступна в терминале (симлинк в ~/.local/bin, без пароля администратора). Это можно сделать позже в Настройках.")
+            Text(Strings.CLIOnboarding.body)
         }
         .onAppear {
             model.maybeOfferCLIOnboarding()
@@ -56,12 +56,12 @@ struct MainView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.content)
         .confirmationDialog(
-            "Удалить \(model.selection.count) \(Format.plural(model.selection.count, ["ссылку", "ссылки", "ссылок"]))?",
+            Strings.Main.deleteConfirm(model.selection.count),
             isPresented: $showBulkDeleteConfirm,
             titleVisibility: .visible
         ) {
-            Button("Удалить", role: .destructive) { model.deleteSelected() }
-            Button("Отмена", role: .cancel) {}
+            Button(Strings.Common.delete, role: .destructive) { model.deleteSelected() }
+            Button(Strings.Common.cancel, role: .cancel) {}
         }
     }
 
@@ -78,12 +78,12 @@ struct MainView: View {
 
     private var bulkBar: some View {
         HStack(spacing: Spacing.s12) {
-            Text("Выбрано: \(model.selection.count)")
+            Text(Strings.Main.selectedCount(model.selection.count))
                 .font(Typography.body)
                 .foregroundStyle(Theme.textSecondary)
             Spacer()
             Button(action: { withAnimation(.easeInOut(duration: 0.22)) { model.toggleEditing() } }) {
-                Text("Готово")
+                Text(Strings.Common.done)
                     .font(Typography.bodyEmphasis)
                     .foregroundStyle(Theme.accent)
                     .padding(.horizontal, Spacing.s12).frame(height: Size.controlHeight)
@@ -121,10 +121,10 @@ struct MainView: View {
             Spacer()
             if model.screen == .library && model.selectedLink == nil {
                 HStack(spacing: Spacing.s6) {
-                    Image(systemName: "magnifyingglass")
+                    Image(systemName: Icons.Action.search)
                         .font(Typography.glyphSmall)
                         .foregroundStyle(Theme.textSecondary)
-                    TextField("Поиск", text: $model.query)
+                    TextField(Strings.Main.search, text: $model.query)
                         .textFieldStyle(.plain)
                         .font(Typography.body)
                 }
@@ -140,7 +140,7 @@ struct MainView: View {
                             withAnimation(.easeInOut(duration: 0.22)) { model.toggleEditing() }
                         }
                     }) {
-                        Image(systemName: model.editing ? "trash" : "square.and.pencil")
+                        Image(systemName: model.editing ? Icons.Action.delete : Icons.Action.edit)
                             .font(Typography.glyphAction)
                             .foregroundStyle(editIconColor)
                             .frame(width: Size.controlHeight, height: Size.controlHeight)
@@ -149,14 +149,14 @@ struct MainView: View {
                     }
                     .buttonStyle(.plain)
                     .disabled(model.editing && !model.canDeleteSelected)
-                    .help(model.editing ? "Удалить выбранные" : "Выбрать несколько")
+                    .help(model.editing ? Strings.Main.deleteSelected : Strings.Main.selectMultiple)
                 }
             }
 
             Button(action: { model.openCreate() }) {
                 HStack(spacing: Spacing.s6) {
-                    Image(systemName: "plus")
-                    Text("Новая ссылка")
+                    Image(systemName: Icons.Action.add)
+                    Text(Strings.Common.newLink)
                 }
             }
             .buttonStyle(PrimaryButtonStyle(size: .small))

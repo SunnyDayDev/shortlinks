@@ -1,8 +1,10 @@
 import Foundation
 
-/// Отображаемые строки (перенос текстовых хелперов из макета).
+/// Отображаемые строки: композиция поверх реестра `Strings`. Сырых пользовательских
+/// литералов здесь нет — только логика сборки из локализованных кусков.
 public enum Format {
-    /// Русское склонение по числу: `forms = [одна, две, пять]`.
+    /// Русское склонение по числу: `forms = [одна, две, пять]`. Используется как фолбэк
+    /// для plural-ключей каталога, когда каталог недоступен (см. `Strings`/`Localization`).
     public static func plural(_ n: Int, _ forms: [String]) -> String {
         let a = n % 10, b = n % 100
         if a == 1 && b != 11 { return forms[0] }
@@ -10,32 +12,35 @@ public enum Format {
         return forms[2]
     }
 
-    public static func opensText(_ n: Int) -> String {
-        "\(n) " + plural(n, ["переход", "перехода", "переходов"])
-    }
+    public static func opensText(_ n: Int) -> String { Strings.opensCount(n) }
 
     public static func kindLabel(_ kind: LinkKind) -> String {
-        kind == .once ? "Одноразовая" : "Многоразовая"
+        kind == .once ? Strings.Kind.once : Strings.Kind.reuse
     }
 
     public static func statusLabel(_ status: LinkStatus) -> String {
         switch status {
-        case .active: return "Активна"
-        case .viewed: return "Просмотрена"
-        case .disabled: return "Деактивирована"
-        case .expired: return "Истекла"
+        case .active: return Strings.Status.active
+        case .viewed: return Strings.Status.viewed
+        case .disabled: return Strings.Status.disabled
+        case .expired: return Strings.Status.expired
         }
+    }
+
+    /// Дата/время в текущей локали (согласована с языком интерфейса — см. `Localization.locale`).
+    public static func dateTime(_ date: Date) -> String {
+        let fmt = DateFormatter()
+        fmt.locale = Localization.locale
+        fmt.dateStyle = .medium
+        fmt.timeStyle = .short
+        return fmt.string(from: date)
     }
 
     /// Текст срока действия для карточки.
     public static func expiresText(_ link: Link, now: Date = Date()) -> String {
-        guard let expiresAt = link.expiresAt else { return "Без срока" }
-        if expiresAt <= now { return "Истёк" }
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "ru_RU")
-        fmt.dateStyle = .medium
-        fmt.timeStyle = .short
-        return fmt.string(from: expiresAt)
+        guard let expiresAt = link.expiresAt else { return Strings.Expiry.none }
+        if expiresAt <= now { return Strings.Expiry.expired }
+        return dateTime(expiresAt)
     }
 
     /// Подпись-описание для строки списка.
@@ -45,27 +50,27 @@ public enum Format {
         case .active:
             if link.kind == .once {
                 if let e = link.expiresAt {
-                    return "\(kind) · истекает \(shortExpiry(e, now: now))"
+                    return Strings.Subtitle.onceExpires(kind, shortExpiry(e, now: now))
                 }
-                return "\(kind) · без срока"
+                return Strings.Subtitle.onceNoExpiry(kind)
             }
-            return "\(kind) · \(opensText(link.opens))"
+            return Strings.Subtitle.reuse(kind, opensText(link.opens))
         case .viewed:
-            return "\(kind) · потреблена"
+            return Strings.Subtitle.viewed(kind)
         case .disabled:
-            return "\(kind) · деактивирована"
+            return Strings.Subtitle.disabled(kind)
         case .expired:
-            return "\(kind) · срок истёк"
+            return Strings.Subtitle.expired(kind)
         }
     }
 
     private static func shortExpiry(_ date: Date, now: Date) -> String {
         let interval = date.timeIntervalSince(now)
-        if interval <= 0 { return "скоро" }
+        if interval <= 0 { return Strings.Expiry.soon }
         let hours = Int(interval / 3600)
-        if hours < 1 { return "менее часа" }
-        if hours < 24 { return "\(hours) \(plural(hours, ["час", "часа", "часов"]))" }
+        if hours < 1 { return Strings.Expiry.lessThanHour }
+        if hours < 24 { return Strings.Expiry.hours(hours) }
         let days = hours / 24
-        return "\(days) \(plural(days, ["день", "дня", "дней"]))"
+        return Strings.Expiry.days(days)
     }
 }
