@@ -7,18 +7,19 @@ struct RedirectOverlay: View {
     var body: some View {
         @Bindable var model = model
         ZStack {
-            Color.black.opacity(0.45)
+            Theme.scrim
                 .ignoresSafeArea()
                 .onTapGesture { model.closeRedirect() }
 
             VStack(spacing: 0) {
-                HStack(spacing: 9) {
-                    RoundedRectangle(cornerRadius: 5).fill(Theme.accent).frame(width: 18, height: 18)
+                HStack(spacing: Spacing.s8) {
+                    RoundedRectangle(cornerRadius: Radius.sm).fill(Theme.accent)
+                        .frame(width: Size.accentSquare, height: Size.accentSquare)
                     Text(Scheme.url(forSlug: model.redirectSlug ?? ""))
-                        .font(.system(size: 13, design: .monospaced))
+                        .font(Typography.mono)
                     Spacer()
                 }
-                .padding(.horizontal, 22).padding(.vertical, 16)
+                .padding(.horizontal, Spacing.s22).padding(.vertical, Spacing.s16)
                 .overlay(Divider(), alignment: .bottom)
 
                 switch model.redirectPhase {
@@ -27,8 +28,8 @@ struct RedirectOverlay: View {
                 case .consumed: consumed
                 }
             }
-            .frame(width: 430)
-            .background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 16))
+            .frame(width: Size.overlayWidth)
+            .background(Theme.overlay, in: RoundedRectangle(cornerRadius: Radius.xxl))
             .shadow(color: .black.opacity(0.4), radius: 30, y: 12)
         }
     }
@@ -38,38 +39,37 @@ struct RedirectOverlay: View {
         @Bindable var model = model
         if let link = model.redirectLink {
             VStack(alignment: .leading, spacing: 0) {
-                Text("Открыть ссылку?").font(.system(size: 15, weight: .bold))
+                Text("Открыть ссылку?").font(Typography.headline)
                 Text("Этот короткий адрес перенаправит вас на:")
-                    .font(.system(size: 13)).foregroundStyle(Theme.secondaryText).padding(.top, 6)
+                    .font(Typography.body).foregroundStyle(Theme.textSecondary).padding(.top, Spacing.s6)
                 Text(link.target)
-                    .font(.system(size: 12.5, design: .monospaced))
+                    .font(Typography.monoSmall)
                     .textSelection(.enabled)
-                    .padding(12)
+                    .padding(Spacing.s12)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Theme.codeBg, in: RoundedRectangle(cornerRadius: 10))
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.cardBorder, lineWidth: 0.5))
-                    .padding(.top, 12)
+                    .codeBox(bordered: true)
+                    .padding(.top, Spacing.s12)
 
                 if link.kind == .once {
-                    HStack(alignment: .top, spacing: 9) {
+                    HStack(alignment: .top, spacing: Spacing.s8) {
                         Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Theme.onceAccent)
                         Text("Одноразовая ссылка. После перехода она станет недоступной.")
-                            .font(.system(size: 12)).foregroundStyle(Theme.onceText)
+                            .font(Typography.caption).foregroundStyle(Theme.onceText)
                     }
-                    .padding(11)
+                    .padding(Spacing.s12)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(hex: 0xE08A2B, alpha: 0.1), in: RoundedRectangle(cornerRadius: 10))
-                    .padding(.top, 14)
+                    .background(Theme.onceBg, in: RoundedRectangle(cornerRadius: Radius.lg))
+                    .padding(.top, Spacing.s14)
                 }
 
                 if link.isProtected {
                     SecureField("Пароль", text: $model.redirectPasswordInput)
                         .textFieldStyle(.roundedBorder)
-                        .padding(.top, 12)
+                        .padding(.top, Spacing.s12)
                         .onSubmit { model.confirmRedirect() }
                 }
 
-                HStack(spacing: 10) {
+                HStack(spacing: Spacing.s10) {
                     Button("Отмена") { model.closeRedirect() }
                         .frame(maxWidth: .infinity)
                     Button(action: { model.confirmRedirect() }) {
@@ -79,38 +79,38 @@ struct RedirectOverlay: View {
                     .buttonStyle(.borderedProminent)
                     .keyboardShortcut(.defaultAction)
                 }
-                .padding(.top, 20)
+                .padding(.top, Spacing.s20)
             }
-            .padding(22)
+            .padding(Spacing.s22)
         }
     }
 
     private var blocked: some View {
         VStack(spacing: 0) {
             Image(systemName: "xmark.circle.fill")
-                .font(.system(size: 44)).foregroundStyle(Color(hex: 0xC0392B))
-            Text("Ссылка недоступна").font(.system(size: 16, weight: .bold)).padding(.top, 14)
+                .font(Typography.glyphLarge).foregroundStyle(Theme.destructive)
+            Text("Ссылка недоступна").font(Typography.title).padding(.top, Spacing.s14)
             Text(blockedReason)
-                .font(.system(size: 13)).foregroundStyle(Theme.secondaryText)
-                .multilineTextAlignment(.center).frame(maxWidth: 300).padding(.top, 7)
-            Button("Закрыть") { model.closeRedirect() }.padding(.top, 20)
+                .font(Typography.body).foregroundStyle(Theme.textSecondary)
+                .multilineTextAlignment(.center).frame(maxWidth: Size.dialogTextMaxWidth).padding(.top, Spacing.s8)
+            Button("Закрыть") { model.closeRedirect() }.padding(.top, Spacing.s20)
         }
-        .padding(.horizontal, 22).padding(.vertical, 26)
+        .padding(.horizontal, Spacing.s22).padding(.vertical, Spacing.s26)
         .frame(maxWidth: .infinity)
     }
 
     private var consumed: some View {
         VStack(spacing: 0) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 44)).foregroundStyle(Theme.activeAccent)
-            Text("Открыто").font(.system(size: 16, weight: .bold)).padding(.top, 14)
+                .font(Typography.glyphLarge).foregroundStyle(Theme.activeAccent)
+            Text("Открыто").font(Typography.title).padding(.top, Spacing.s14)
             Text("Переход выполнен. Эта одноразовая ссылка сгорела и больше недоступна.")
-                .font(.system(size: 13)).foregroundStyle(Theme.secondaryText)
-                .multilineTextAlignment(.center).frame(maxWidth: 300).padding(.top, 7)
+                .font(Typography.body).foregroundStyle(Theme.textSecondary)
+                .multilineTextAlignment(.center).frame(maxWidth: Size.dialogTextMaxWidth).padding(.top, Spacing.s8)
             Button("Готово") { model.closeRedirect() }
-                .buttonStyle(.borderedProminent).padding(.top, 20)
+                .buttonStyle(.borderedProminent).padding(.top, Spacing.s20)
         }
-        .padding(.horizontal, 22).padding(.vertical, 26)
+        .padding(.horizontal, Spacing.s22).padding(.vertical, Spacing.s26)
         .frame(maxWidth: .infinity)
     }
 

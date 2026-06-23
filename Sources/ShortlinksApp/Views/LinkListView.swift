@@ -9,13 +9,13 @@ struct LinkListView: View {
         if links.isEmpty {
             EmptyState()
         } else {
-            VStack(spacing: 8) {
+            VStack(spacing: Spacing.s8) {
                 ForEach(links) { link in
                     row(link)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 14).padding(.bottom, 24)
+            .padding(.horizontal, Spacing.s16)
+            .padding(.top, Spacing.s14).padding(.bottom, Spacing.s24)
         }
     }
 
@@ -57,50 +57,49 @@ struct LinkRow: View {
     var selected = false
 
     var body: some View {
-        HStack(spacing: 13) {
+        HStack(spacing: Spacing.s12) {
             if editing {
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 18))
-                    .foregroundStyle(selected ? Theme.accent : Color.secondary)
+                    .font(Typography.glyphMedium)
+                    .foregroundStyle(selected ? Theme.accent : Theme.textSecondary)
                     .transition(.move(edge: .leading).combined(with: .opacity))
             }
             TargetIcon(target: link.target)
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: Spacing.s4) {
                 HStack(spacing: 0) {
-                    Text("sl://link/").foregroundStyle(Color.secondary)
-                    Text(link.slug).foregroundStyle(.primary)
+                    Text("sl://link/").foregroundStyle(Theme.textSecondary)
+                    Text(link.slug).foregroundStyle(Theme.textPrimary)
                 }
-                .font(.system(size: 13.5, design: .monospaced))
+                .font(Typography.mono)
                 .lineLimit(1)
 
                 Text(link.target)
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.secondaryText)
+                    .font(Typography.caption)
+                    .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
 
                 Text(Format.subtitle(link))
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(Color.secondary)
+                    .font(Typography.caption2)
+                    .foregroundStyle(Theme.textSecondary)
 
                 if !link.tags.isEmpty {
-                    FlowLayout(spacing: 5) {
+                    FlowLayout(spacing: Spacing.s6) {
                         ForEach(link.tags, id: \.self) { TagChip(name: $0) }
                     }
-                    .padding(.top, 3)
+                    .padding(.top, Spacing.s4)
                 }
             }
-            Spacer(minLength: 6)
+            Spacer(minLength: Spacing.s6)
             StatusPill(status: link.status())
             if !editing {
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Color.secondary)
+                    .font(Typography.glyphSmall)
+                    .foregroundStyle(Theme.textSecondary)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
-        .padding(.horizontal, 14).padding(.vertical, 12)
-        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Theme.cardBorder, lineWidth: 0.5))
+        .padding(.horizontal, Spacing.s14).padding(.vertical, Spacing.s12)
+        .card(radius: Radius.lg)
     }
 }
 
@@ -110,29 +109,25 @@ struct EmptyState: View {
     var body: some View {
         VStack(spacing: 0) {
             Text("sl://")
-                .font(.system(size: 15, design: .monospaced))
-                .foregroundStyle(Color(hex: 0x9AA0AC))
-                .frame(width: 64, height: 64)
-                .background(Theme.iconBg, in: RoundedRectangle(cornerRadius: 16))
-                .padding(.bottom, 16)
-            Text("Здесь пока пусто").font(.system(size: 16, weight: .semibold))
+                .font(Typography.monoHeadline)
+                .foregroundStyle(Theme.placeholderGlyph)
+                .frame(width: Size.emptyIcon, height: Size.emptyIcon)
+                .background(Theme.iconBg, in: RoundedRectangle(cornerRadius: Radius.xxl))
+                .padding(.bottom, Spacing.s16)
+            Text("Здесь пока пусто").font(Typography.title)
             Text("Создайте короткую ссылку — она будет работать на этом Mac.")
-                .font(.system(size: 13))
-                .foregroundStyle(Theme.secondaryText)
+                .font(Typography.body)
+                .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)
-                .frame(maxWidth: 280)
-                .padding(.top, 6)
+                .frame(maxWidth: Size.emptyTextMaxWidth)
+                .padding(.top, Spacing.s6)
             Button(action: { model.openCreate() }) {
-                HStack(spacing: 6) { Image(systemName: "plus"); Text("Новая ссылка") }
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 16).frame(height: 32)
-                    .background(Theme.accent, in: RoundedRectangle(cornerRadius: 8))
+                HStack(spacing: Spacing.s6) { Image(systemName: "plus"); Text("Новая ссылка") }
             }
-            .buttonStyle(.plain)
-            .padding(.top, 18)
+            .buttonStyle(PrimaryButtonStyle(size: .medium))
+            .padding(.top, Spacing.s18)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 90)
+        .padding(.vertical, Size.emptyStateVInset)
     }
 }

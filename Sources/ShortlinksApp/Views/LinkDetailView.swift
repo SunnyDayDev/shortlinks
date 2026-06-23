@@ -14,105 +14,86 @@ struct LinkDetailView: View {
         let status = link.status()
         return VStack(alignment: .leading, spacing: 0) {
             Button(action: { model.back() }) {
-                HStack(spacing: 5) {
+                HStack(spacing: Spacing.s6) {
                     Image(systemName: "chevron.left")
                     Text("Все ссылки")
                 }
-                .font(.system(size: 13, weight: .medium))
+                .font(Typography.bodyMedium)
                 .foregroundStyle(Theme.accent)
             }
             .buttonStyle(.plain)
-            .padding(.bottom, 18)
+            .padding(.bottom, Spacing.s18)
 
-            HStack(spacing: 14) {
-                TargetIcon(target: link.target, size: 52)
-                VStack(alignment: .leading, spacing: 7) {
+            HStack(spacing: Spacing.s14) {
+                TargetIcon(target: link.target, size: Size.detailIcon)
+                VStack(alignment: .leading, spacing: Spacing.s8) {
                     Text(link.fullURL)
-                        .font(.system(size: 18, weight: .semibold, design: .monospaced))
+                        .font(Typography.monoTitle)
                     StatusPill(status: status)
                 }
                 Spacer()
                 Button("Копировать") { model.copy(link.fullURL) }
                     .buttonStyle(.bordered)
             }
-            .padding(.bottom, 22)
+            .padding(.bottom, Spacing.s22)
 
             infoCard(link, status: status)
 
-            HStack(spacing: 10) {
+            HStack(spacing: Spacing.s10) {
                 if status == .active {
                     Button(action: { model.openLink(link) }) {
-                        HStack(spacing: 7) {
+                        HStack(spacing: Spacing.s6) {
                             Image(systemName: "arrow.right")
                             Text(Scheme.detect(link.target).openLabel)
                         }
-                        .font(.system(size: 13.5, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 18).frame(height: 36)
-                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 9))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(PrimaryButtonStyle(size: .large))
                 } else {
                     Text("Ссылка недоступна")
-                        .font(.system(size: 13.5, weight: .semibold))
-                        .foregroundStyle(Theme.secondaryText)
-                        .padding(.horizontal, 18).frame(height: 36)
-                        .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: 9))
+                        .font(Typography.bodyEmphasis)
+                        .foregroundStyle(Theme.textSecondary)
+                        .padding(.horizontal, Spacing.s18).frame(height: Size.actionHeight)
+                        .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: Radius.md))
                 }
                 Spacer()
                 Button(role: .destructive, action: { model.delete(id: link.id) }) {
                     Text("Удалить")
-                        .font(.system(size: 13.5, weight: .semibold))
-                        .foregroundStyle(Color(hex: 0xC0392B))
-                        .padding(.horizontal, 16).frame(height: 36)
-                        .background(Color(hex: 0xD2372D, alpha: 0.08), in: RoundedRectangle(cornerRadius: 9))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(DestructiveButtonStyle(size: .large))
             }
-            .padding(.top, 20)
+            .padding(.top, Spacing.s20)
         }
-        .padding(.horizontal, 24).padding(.top, 18).padding(.bottom, 28)
-        .frame(maxWidth: 680, alignment: .leading)
+        .screenContainer(maxWidth: Size.detailMaxWidth, bottom: Spacing.s26)
     }
 
     private func infoCard(_ link: Link, status: LinkStatus) -> some View {
         VStack(spacing: 0) {
-            infoRow("Перенаправляет на", link.target, mono: true)
+            InfoRow(label: "Перенаправляет на", value: link.target, mono: true)
             Divider()
-            infoRow("Тип", Format.kindLabel(link.kind))
+            InfoRow(label: "Тип", value: Format.kindLabel(link.kind))
             Divider()
-            infoRow("Переходов", Format.opensText(link.opens))
+            InfoRow(label: "Переходов", value: Format.opensText(link.opens))
             Divider()
-            infoRow("Срок действия", expiryText(link, status: status))
+            InfoRow(label: "Срок действия", value: expiryText(link, status: status))
             Divider()
-            infoRow("Пароль", link.isProtected ? "Включён" : "Нет")
+            InfoRow(label: "Пароль", value: link.isProtected ? "Включён" : "Нет")
             if !link.tags.isEmpty {
                 Divider()
                 HStack(alignment: .top) {
-                    Text("Метки").frame(width: 150, alignment: .leading).foregroundStyle(Theme.secondaryText)
-                    FlowLayout(spacing: 6) {
+                    Text("Метки")
+                        .frame(width: Size.infoLabelWidth, alignment: .leading)
+                        .foregroundStyle(Theme.textSecondary)
+                    FlowLayout(spacing: Spacing.s6) {
                         ForEach(link.tags, id: \.self) { TagChip(name: $0) }
                     }
                 }
-                .padding(.horizontal, 16).padding(.vertical, 13)
+                .padding(.horizontal, Spacing.s16).padding(.vertical, Spacing.s12)
             }
             Divider()
-            infoRow("Создана", created(link))
+            InfoRow(label: "Создана", value: created(link))
         }
-        .font(.system(size: 13))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.cardBorder, lineWidth: 0.5))
-        .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func infoRow(_ label: String, _ value: String, mono: Bool = false) -> some View {
-        HStack(alignment: .top) {
-            Text(label).frame(width: 150, alignment: .leading).foregroundStyle(Theme.secondaryText)
-            Text(value)
-                .font(mono ? .system(size: 12.5, design: .monospaced) : .system(size: 13, weight: .medium))
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(.horizontal, 16).padding(.vertical, 13)
+        .font(Typography.body)
+        .card()
     }
 
     private func expiryText(_ link: Link, status: LinkStatus) -> String {
