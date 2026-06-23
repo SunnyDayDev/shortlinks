@@ -35,19 +35,19 @@ struct LinkListView: View {
     private func contextMenu(_ link: Link) -> some View {
         let status = link.status()
         if status == .active {
-            Button("Открыть") { model.openLink(link) }
+            Button(Strings.List.open) { model.openLink(link) }
         }
-        Button("Скопировать адрес") { model.copy(link.fullURL) }
+        Button(Strings.List.copyAddress) { model.copy(link.fullURL) }
         // Активировать сгоревшую (viewed) ссылку нечего — пункт только для остальных.
         if status != .viewed {
             if status == .disabled {
-                Button("Активировать") { model.activate(id: link.id) }
+                Button(Strings.List.activate) { model.activate(id: link.id) }
             } else {
-                Button("Деактивировать") { model.deactivate(id: link.id) }
+                Button(Strings.List.deactivate) { model.deactivate(id: link.id) }
             }
         }
         Divider()
-        Button("Удалить", role: .destructive) { model.delete(id: link.id) }
+        Button(Strings.Common.delete, role: .destructive) { model.delete(id: link.id) }
     }
 }
 
@@ -59,7 +59,7 @@ struct LinkRow: View {
     var body: some View {
         HStack(spacing: Spacing.s12) {
             if editing {
-                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                Image(systemName: selected ? Icons.Select.on : Icons.Select.off)
                     .font(Typography.glyphMedium)
                     .foregroundStyle(selected ? Theme.accent : Theme.textSecondary)
                     .transition(.move(edge: .leading).combined(with: .opacity))
@@ -92,7 +92,7 @@ struct LinkRow: View {
             Spacer(minLength: Spacing.s6)
             StatusPill(status: link.status())
             if !editing {
-                Image(systemName: "chevron.right")
+                Image(systemName: Icons.Nav.forward)
                     .font(Typography.glyphSmall)
                     .foregroundStyle(Theme.textSecondary)
                     .transition(.move(edge: .trailing).combined(with: .opacity))
@@ -114,15 +114,15 @@ struct EmptyState: View {
                 .frame(width: Size.emptyIcon, height: Size.emptyIcon)
                 .background(Theme.iconBg, in: RoundedRectangle(cornerRadius: Radius.xxl))
                 .padding(.bottom, Spacing.s16)
-            Text("Здесь пока пусто").font(Typography.title)
-            Text("Создайте короткую ссылку — она будет работать на этом Mac.")
+            Text(Strings.List.emptyTitle).font(Typography.title)
+            Text(Strings.List.emptySubtitle)
                 .font(Typography.body)
                 .foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: Size.emptyTextMaxWidth)
                 .padding(.top, Spacing.s6)
             Button(action: { model.openCreate() }) {
-                HStack(spacing: Spacing.s6) { Image(systemName: "plus"); Text("Новая ссылка") }
+                HStack(spacing: Spacing.s6) { Image(systemName: Icons.Action.add); Text(Strings.Common.newLink) }
             }
             .buttonStyle(PrimaryButtonStyle(size: .medium))
             .padding(.top, Spacing.s18)

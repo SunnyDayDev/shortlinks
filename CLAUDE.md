@@ -23,6 +23,11 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
   - `Link` + `LinkKind`/`LinkStatus`, `StorageLocation`, `LinkStore`
     (CRUD над единым `links.json` через `NSFileCoordinator`, атомарная запись),
     `Slug`, `Scheme`, `Password` (соль+SHA-256), `ConflictMerge`.
+  - Локализация: реестр строк `Strings` + `Localization` (bundle-локатор каталога и
+    выбор языка) + `Format` (склонения/даты). String Catalog лежит в app-таргете
+    (`Localizable.xcstrings`); встроенный CLI резолвит его из ресурсов приложения,
+    standalone-CLI/тесты — фолбэк на `defaultValue` (русский). См. change
+    `extract-strings-and-icons`.
 - **ShortlinksApp** — SwiftUI `MenuBarExtra` + **единственное окно через AppKit**
   (`AppDelegate`, `NSWindow` + `NSHostingController`, лениво). Фоновый агент
   (`LSUIElement: true`) — без постоянной иконки в Dock. Сцена SwiftUI `Window` НЕ
@@ -76,6 +81,12 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 
 - Цвета/вёрстка экранов — по макету `_design/Одноразовые ссылки.dc.html` (акцент `#2A6FDB`).
 - Доменную логику добавлять в ShortlinksCore, а не дублировать в app/CLI.
+- **Строки** — только через реестр `Strings` (ShortlinksCore) поверх `Localizable.xcstrings`;
+  русский — язык-источник (`defaultValue`). Не хардкодить пользовательские литералы во
+  вью/CLI/`Format`. Склонения — plural-вариации каталога с фолбэком `Format.plural`. Перевод
+  на новый язык — запись в каталог + `CFBundleLocalizations` в `project.yml`, без правок кода.
+  Язык: системный, плюс `LANG`/`LC_*`/`--lang` в CLI (приоритет — см. `Localization`).
+- **Иконки** — только через реестр `Icons` (DesignSystem); не хардкодить имена SF Symbols во вью.
 - Идентификаторы: схема `sl`, bundle id приложения `com.tsikin.Shortlinks`.
 
 ## Git-процесс (gitflow)

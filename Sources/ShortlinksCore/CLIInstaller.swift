@@ -18,7 +18,7 @@ public enum CLIInstallError: Error, CustomStringConvertible {
     public var description: String {
         switch self {
         case .foreignObject(let path):
-            return "Путь \(path) занят посторонним объектом — он не будет изменён"
+            return Strings.CLIInstall.foreignObject(path)
         }
     }
 }
@@ -66,16 +66,16 @@ public struct CLIInstaller {
         // attributesOfItem использует lstat — не следует по симлинку, видит и битый симлинк.
         guard (try? fm.attributesOfItem(atPath: path)) != nil else { return .notInstalled }
         guard let dest = try? fm.destinationOfSymbolicLink(atPath: path) else {
-            return .conflict(reason: "По пути \(prettyPath) лежит посторонний файл")
+            return .conflict(reason: Strings.CLIInstall.conflictForeignFile(prettyPath))
         }
         let destURL = resolvedDestination(dest)
         if samePath(destURL, bundledBinaryURL) {
             return .installed(path: prettyPath)
         }
         if isShortlinksBinary(destURL) {
-            return .conflict(reason: "Симлинк указывает на другой бандл Shortlinks: \(destURL.path)")
+            return .conflict(reason: Strings.CLIInstall.conflictOtherBundle(destURL.path))
         }
-        return .conflict(reason: "По пути \(prettyPath) симлинк на посторонний объект")
+        return .conflict(reason: Strings.CLIInstall.conflictForeignLink(prettyPath))
     }
 
     // MARK: - Установка

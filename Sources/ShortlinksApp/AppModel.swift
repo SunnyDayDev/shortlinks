@@ -158,14 +158,14 @@ final class AppModel {
     var toolbarTitle: String {
         if let link = selectedLink { return link.fullURL }
         switch screen {
-        case .settings: return "Настройки"
-        case .how: return "Как это работает"
+        case .settings: return Strings.Sidebar.settings
+        case .how: return Strings.Sidebar.how
         case .library:
             switch filter {
-            case .all: return "Все ссылки"
-            case .active: return "Активные"
-            case .once: return "Одноразовые"
-            case .expired: return "Истёкшие"
+            case .all: return Strings.Sidebar.all
+            case .active: return Strings.Sidebar.active
+            case .once: return Strings.Sidebar.once
+            case .expired: return Strings.Sidebar.expired
             case .tag(let t): return "#\(t)"
             }
         }
@@ -328,14 +328,14 @@ final class AppModel {
         guard let opened = store.consume(slug: slug, deleteOnConsume: deleteOnConsume) else { return }
         Opener.open(opened.target)
         reload()
-        flashToast(opened.kind == .once ? "Открыто · ссылка сгорела" : "Переход выполнен")
+        flashToast(opened.kind == .once ? Strings.Toast.opened : Strings.Toast.redirected)
     }
 
     func confirmRedirect() {
         guard let slug = redirectSlug, let link = redirectLink else { return }
         if let hash = link.passwordHash {
             guard Password.verify(redirectPasswordInput, against: hash) else {
-                flashToast("Неверный пароль")
+                flashToast(Strings.Toast.wrongPassword)
                 return
             }
         }
@@ -350,7 +350,7 @@ final class AppModel {
             redirectPhase = .consumed
         } else {
             redirectSlug = nil
-            flashToast("Переход выполнен")
+            flashToast(Strings.Toast.redirected)
         }
     }
 
@@ -387,7 +387,7 @@ final class AppModel {
     func copy(_ text: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
-        flashToast("Скопировано: \(text)")
+        flashToast(Strings.Toast.copied(text))
     }
 
     func flashToast(_ text: String) {
@@ -408,7 +408,7 @@ final class AppModel {
             reload()
         } catch {
             syncEnabled = StorageLocation.isSyncEnabled
-            flashToast("iCloud Drive недоступен")
+            flashToast(Strings.Toast.icloudUnavailable)
         }
     }
 
@@ -428,7 +428,7 @@ final class AppModel {
         do {
             try cli.install()
             refreshCLIStatus()
-            flashToast("CLI установлен")
+            flashToast(Strings.Toast.cliInstalled)
         } catch {
             flashToast("\(error)")
         }
@@ -438,7 +438,7 @@ final class AppModel {
         do {
             try cli.uninstall()
             refreshCLIStatus()
-            flashToast("CLI удалён")
+            flashToast(Strings.Toast.cliRemoved)
         } catch {
             flashToast("\(error)")
         }

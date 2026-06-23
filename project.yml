@@ -60,6 +60,9 @@ targets:
       properties:
         CFBundleDisplayName: Shortlinks
         CFBundleName: Shortlinks
+        # Языки интерфейса в каталоге. Перевод на другие языки добавляется в
+        # Localizable.xcstrings и сюда. См. change extract-strings-and-icons.
+        CFBundleLocalizations: [ru]
         # true = фоновый агент: только меню-бар, без постоянной иконки в Dock.
         # Открытие sl:// в фоне (активная многоразовая ссылка без пароля) проходит тихо.
         # Когда нужен UI (пароль/ненайдена/заблокирована/подтверждение), приложение
@@ -77,6 +80,7 @@ targets:
       base:
         PRODUCT_NAME: Shortlinks
         PRODUCT_BUNDLE_IDENTIFIER: com.shortlinks.app
+        DEVELOPMENT_LANGUAGE: ru        # язык-источник каталога (CFBundleDevelopmentRegion)
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"

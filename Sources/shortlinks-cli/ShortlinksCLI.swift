@@ -9,43 +9,57 @@ import AppKit
 struct ShortlinksCLI: ParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "shortlinks",
-        abstract: "Локальные короткие ссылки sl://link/<slug>",
+        abstract: Strings.CLI.rootAbstract,
         subcommands: [Add.self, ListCmd.self, Remove.self, Open.self, Resolve.self]
     )
+}
+
+/// Глобальные опции всех подкоманд. `--lang <code>` переопределяет язык вывода (выше
+/// приоритетом, чем `LANG`/`LC_*`/системные предпочтения). Применяется при разборе,
+/// до выполнения команды. См. `Localization` (решение 4a).
+struct GlobalOptions: ParsableArguments {
+    @Option(name: .long, help: ArgumentHelp(Strings.CLI.langHelp, valueName: "code"))
+    var lang: String?
+
+    func validate() throws {
+        if let lang { Localization.overrideLanguage = lang }
+    }
 }
 
 // MARK: - add
 
 struct Add: ParsableCommand {
-    static let configuration = CommandConfiguration(commandName: "add", abstract: "Создать короткую ссылку")
+    static let configuration = CommandConfiguration(commandName: "add", abstract: Strings.CLI.addAbstract)
 
-    @Argument(help: "Цель перехода: https://, file://, app-scheme:// или путь")
+    @OptionGroup var global: GlobalOptions
+
+    @Argument(help: ArgumentHelp(Strings.CLI.addTarget))
     var target: String
 
-    @Option(help: "Короткий slug (по умолчанию случайный)")
+    @Option(help: ArgumentHelp(Strings.CLI.addSlug))
     var slug: String?
 
-    @Flag(help: "Одноразовая ссылка («сгорает» после первого перехода)")
+    @Flag(help: ArgumentHelp(Strings.CLI.addOnce))
     var once = false
 
-    @Flag(help: "Многоразовая ссылка (по умолчанию)")
+    @Flag(help: ArgumentHelp(Strings.CLI.addReuse))
     var reuse = false
 
-    @Option(help: "Срок действия: 1h | 24h | 7d | never")
+    @Option(help: ArgumentHelp(Strings.CLI.addTTL))
     var ttl: String = "never"
 
-    @Option(help: "Пароль, запрашиваемый перед переходом")
+    @Option(help: ArgumentHelp(Strings.CLI.addPassword))
     var password: String?
 
-    @Option(name: [.customShort("g"), .long], help: "Тег (можно повторять)")
+    @Option(name: [.customShort("g"), .long], help: ArgumentHelp(Strings.CLI.addTag))
     var tag: [String] = []
 
     func run() throws {
         if once && reuse {
-            throw ValidationError("Укажите только один из флагов --once / --reuse")
+            throw ValidationError(Strings.CLI.errBothFlags)
         }
         guard let lifetime = Lifetime(rawValue: ttl) else {
-            throw ValidationError("Некорректный --ttl. Допустимо: 1h, 24h, 7d, never")
+            throw ValidationError(Strings.CLI.errTTL)
         }
         let kind: LinkKind = once ? .once : .reuse
         let finalSlug = Slug.normalizeForSave(slug ?? Slug.generate())
@@ -65,12 +79,14 @@ struct Add: ParsableCommand {
 // MARK: - list
 
 struct ListCmd: ParsableCommand {
-    static let configuration = CommandConfiguration(commandName: "list", abstract: "Показать ссылки")
+    static let configuration = CommandConfiguration(commandName: "list", abstract: Strings.CLI.listAbstract)
 
-    @Option(help: "Фильтр: all | active | once | expired")
+    @OptionGroup var global: GlobalOptions
+
+    @Option(help: ArgumentHelp(Strings.CLI.listFilter))
     var filter: String = "all"
 
-    @Option(help: "Только с этим тегом")
+    @Option(help: ArgumentHelp(Strings.CLI.listTag))
     var tag: String?
 
     func run() {
@@ -86,7 +102,7 @@ struct ListCmd: ParsableCommand {
         default: break
         }
         if links.isEmpty {
-            print("Ссылок нет.")
+            print(Strings.CLI.listEmpty)
             return
         }
         for link in links {
@@ -100,15 +116,17 @@ struct ListCmd: ParsableCommand {
 // MARK: - rm
 
 struct Remove: ParsableCommand {
-    static let configuration = CommandConfiguration(commandName: "rm", abstract: "Удалить ссылку по slug")
+    static let configuration = CommandConfiguration(commandName: "rm", abstract: Strings.CLI.rmAbstract)
 
-    @Argument(help: "slug ссылки")
+    @OptionGroup var global: GlobalOptions
+
+    @Argument(help: ArgumentHelp(Strings.CLI.slugHelp))
     var slug: String
 
     func run() throws {
         let removed = LinkStore(watch: false).delete(slug: slug)
         if removed {
-            print("Удалено: \(Scheme.url(forSlug: slug))")
+            print(Strings.CLI.removed(Scheme.url(forSlug: slug)))
         } else {
             throw CLIError.notFound(slug)
         }
@@ -118,9 +136,11 @@ struct Remove: ParsableCommand {
 // MARK: - resolve
 
 struct Resolve: ParsableCommand {
-    static let configuration = CommandConfiguration(commandName: "resolve", abstract: "Напечатать цель ссылки")
+    static let configuration = CommandConfiguration(commandName: "resolve", abstract: Strings.CLI.resolveAbstract)
 
-    @Argument(help: "slug ссылки")
+    @OptionGroup var global: GlobalOptions
+
+    @Argument(help: ArgumentHelp(Strings.CLI.slugHelp))
     var slug: String
 
     func run() throws {
@@ -134,15 +154,17 @@ struct Resolve: ParsableCommand {
 // MARK: - open
 
 struct Open: ParsableCommand {
-    static let configuration = CommandConfiguration(commandName: "open", abstract: "Открыть цель ссылки")
+    static let configuration = CommandConfiguration(commandName: "open", abstract: Strings.CLI.openAbstract)
 
-    @Argument(help: "slug ссылки")
+    @OptionGroup var global: GlobalOptions
+
+    @Argument(help: ArgumentHelp(Strings.CLI.slugHelp))
     var slug: String
 
-    @Option(help: "Пароль, если ссылка защищена")
+    @Option(help: ArgumentHelp(Strings.CLI.openPassword))
     var password: String?
 
-    @Flag(help: "Удалить одноразовую сразу после перехода")
+    @Flag(help: ArgumentHelp(Strings.CLI.openDeleteOnConsume))
     var deleteOnConsume = false
 
     func run() throws {
@@ -184,9 +206,9 @@ enum CLIError: Error, CustomStringConvertible {
 
     var description: String {
         switch self {
-        case .notFound(let slug): return "Ссылка не найдена: \(slug)"
-        case .unavailable: return "Ссылка недоступна (истекла или уже потреблена)"
-        case .passwordRequired: return "Требуется верный --password"
+        case .notFound(let slug): return Strings.CLI.errNotFound(slug)
+        case .unavailable: return Strings.CLI.errUnavailable
+        case .passwordRequired: return Strings.CLI.errPasswordRequired
         }
     }
 }

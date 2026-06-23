@@ -75,7 +75,7 @@ struct ShortlinksApp: App {
     @State private var model = AppModel.shared
 
     var body: some Scene {
-        MenuBarExtra("Shortlinks", systemImage: "link") {
+        MenuBarExtra("Shortlinks", systemImage: Icons.menuBar) {
             MenuBarContent()
                 .environment(model)
         }
@@ -92,17 +92,17 @@ struct MenuBarContent: View {
     }
 
     var body: some View {
-        Button("Новая ссылка") {
+        Button(Strings.Common.newLink) {
             surface()
             model.openCreate()
         }
-        Button("Открыть окно") {
+        Button(Strings.Menu.openWindow) {
             surface()
         }
         Divider()
         let recent = Array(model.links.prefix(5))
         if recent.isEmpty {
-            Text("Нет ссылок").foregroundStyle(.secondary)
+            Text(Strings.Menu.noLinks).foregroundStyle(.secondary)
         } else {
             ForEach(recent) { link in
                 Button(link.fullURL) {
@@ -112,6 +112,6 @@ struct MenuBarContent: View {
             }
         }
         Divider()
-        Button("Выйти") { NSApplication.shared.terminate(nil) }
+        Button(Strings.Menu.quit) { NSApplication.shared.terminate(nil) }
     }
 }

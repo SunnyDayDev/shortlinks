@@ -39,8 +39,8 @@ struct RedirectOverlay: View {
         @Bindable var model = model
         if let link = model.redirectLink {
             VStack(alignment: .leading, spacing: 0) {
-                Text("Открыть ссылку?").font(Typography.headline)
-                Text("Этот короткий адрес перенаправит вас на:")
+                Text(Strings.Redirect.confirmTitle).font(Typography.headline)
+                Text(Strings.Redirect.confirmBody)
                     .font(Typography.body).foregroundStyle(Theme.textSecondary).padding(.top, Spacing.s6)
                 Text(link.target)
                     .font(Typography.monoSmall)
@@ -52,8 +52,8 @@ struct RedirectOverlay: View {
 
                 if link.kind == .once {
                     HStack(alignment: .top, spacing: Spacing.s8) {
-                        Image(systemName: "exclamationmark.circle.fill").foregroundStyle(Theme.onceAccent)
-                        Text("Одноразовая ссылка. После перехода она станет недоступной.")
+                        Image(systemName: Icons.Status.warningOnce).foregroundStyle(Theme.onceAccent)
+                        Text(Strings.Redirect.onceWarning)
                             .font(Typography.caption).foregroundStyle(Theme.onceText)
                     }
                     .padding(Spacing.s12)
@@ -63,14 +63,14 @@ struct RedirectOverlay: View {
                 }
 
                 if link.isProtected {
-                    SecureField("Пароль", text: $model.redirectPasswordInput)
+                    SecureField(Strings.Common.password, text: $model.redirectPasswordInput)
                         .textFieldStyle(.roundedBorder)
                         .padding(.top, Spacing.s12)
                         .onSubmit { model.confirmRedirect() }
                 }
 
                 HStack(spacing: Spacing.s10) {
-                    Button("Отмена") { model.closeRedirect() }
+                    Button(Strings.Common.cancel) { model.closeRedirect() }
                         .frame(maxWidth: .infinity)
                     Button(action: { model.confirmRedirect() }) {
                         Text(Scheme.detect(link.target).openLabel)
@@ -87,13 +87,13 @@ struct RedirectOverlay: View {
 
     private var blocked: some View {
         VStack(spacing: 0) {
-            Image(systemName: "xmark.circle.fill")
+            Image(systemName: Icons.Status.error)
                 .font(Typography.glyphLarge).foregroundStyle(Theme.destructive)
-            Text("Ссылка недоступна").font(Typography.title).padding(.top, Spacing.s14)
+            Text(Strings.Common.linkUnavailable).font(Typography.title).padding(.top, Spacing.s14)
             Text(blockedReason)
                 .font(Typography.body).foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center).frame(maxWidth: Size.dialogTextMaxWidth).padding(.top, Spacing.s8)
-            Button("Закрыть") { model.closeRedirect() }.padding(.top, Spacing.s20)
+            Button(Strings.Common.close) { model.closeRedirect() }.padding(.top, Spacing.s20)
         }
         .padding(.horizontal, Spacing.s22).padding(.vertical, Spacing.s26)
         .frame(maxWidth: .infinity)
@@ -101,13 +101,13 @@ struct RedirectOverlay: View {
 
     private var consumed: some View {
         VStack(spacing: 0) {
-            Image(systemName: "checkmark.circle.fill")
+            Image(systemName: Icons.Status.success)
                 .font(Typography.glyphLarge).foregroundStyle(Theme.activeAccent)
-            Text("Открыто").font(Typography.title).padding(.top, Spacing.s14)
-            Text("Переход выполнен. Эта одноразовая ссылка сгорела и больше недоступна.")
+            Text(Strings.Redirect.consumedTitle).font(Typography.title).padding(.top, Spacing.s14)
+            Text(Strings.Redirect.consumedBody)
                 .font(Typography.body).foregroundStyle(Theme.textSecondary)
                 .multilineTextAlignment(.center).frame(maxWidth: Size.dialogTextMaxWidth).padding(.top, Spacing.s8)
-            Button("Готово") { model.closeRedirect() }
+            Button(Strings.Common.done) { model.closeRedirect() }
                 .buttonStyle(.borderedProminent).padding(.top, Spacing.s20)
         }
         .padding(.horizontal, Spacing.s22).padding(.vertical, Spacing.s26)
@@ -115,10 +115,10 @@ struct RedirectOverlay: View {
     }
 
     private var blockedReason: String {
-        if model.redirectNotFound { return "Короткая ссылка не найдена на этом Mac." }
+        if model.redirectNotFound { return Strings.Redirect.notFound }
         if let link = model.redirectLink, link.status() == .viewed {
-            return "Эта ссылка уже была просмотрена. Одноразовые ссылки нельзя открыть повторно."
+            return Strings.Redirect.alreadyViewed
         }
-        return "Срок действия ссылки истёк."
+        return Strings.Redirect.expired
     }
 }
