@@ -32,7 +32,10 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
   окна; когда нужен UI (пароль/ненайдена/заблокирована/подтверждение) —
   `surfaceForInteraction` поднимает политику до `.regular` и показывает окно, а по
   закрытии оверлея/окна `AppModel.returnToBackground` прячет окно и возвращает
-  `.accessory`. Экраны — по макету `_design/`.
+  `.accessory`. Обычный запуск (клик по иконке/Spotlight) и reopen показывают окно:
+  `applicationShouldHandleReopen` + отложенная проверка в `didFinishLaunching`
+  (флаг `didOpenURLAtLaunch` отличает запуск ради `sl://` от клика по иконке). Экраны —
+  по макету `_design/`.
 - **shortlinks-cli** — `swift-argument-parser`; команды add/list/rm/open/resolve.
   CLI **вкладывается внутрь** `Shortlinks.app` (`Contents/Helpers/shortlinks`, copy-фаза
   app-таргета) — отдельная установка не нужна. Путь `Helpers` (не `Contents/MacOS`)

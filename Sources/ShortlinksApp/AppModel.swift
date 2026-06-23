@@ -365,8 +365,14 @@ final class AppModel {
         let wasAccessory = NSApp.activationPolicy() == .accessory
         if forRedirect, wasAccessory { surfacedForRedirect = true }
         NSApp.setActivationPolicy(.regular)
-        NSApp.activate(ignoringOtherApps: true)
-        openMainWindow?()
+        // Активацию и показ окна откладываем на следующий тик рунлупа: на холодном
+        // старте из `sl://` (приложение ещё запускается) немедленный activate не
+        // выводит окно в фокус — кажется, что ничего не произошло. Состояние редиректа
+        // уже выставлено в handleIncoming, оверлей отрисуется при показе окна.
+        DispatchQueue.main.async { [weak self] in
+            NSApp.activate(ignoringOtherApps: true)
+            self?.openMainWindow?()
+        }
     }
 
     /// Вернуть приложение в фоновый режим: спрятать окно и убрать иконку из Dock.
