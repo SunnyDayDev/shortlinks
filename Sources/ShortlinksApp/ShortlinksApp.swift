@@ -2,19 +2,53 @@ import SwiftUI
 import AppKit
 import ShortlinksCore
 
-/// Обрабатывает `sl://` на уровне приложения, чтобы фоновый режим не выводил окно.
-final class AppDelegate: NSObject, NSApplicationDelegate {
+/// Обрабатывает `sl://` и управляет единственным окном через AppKit.
+///
+/// Окно создаётся лениво и показывается только по требованию. SwiftUI-сцена `Window`
+/// здесь намеренно НЕ используется: она выводит окно при запуске, и тогда фоновый
+/// переход по `sl://` мигал бы окном на доли секунды. Агент (`LSUIElement`) стартует
+/// без окна; окно появляется лишь когда нужен UI (меню-бар, пароль, оверлей перехода).
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+    private var mainWindow: NSWindow?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Привязываем показ/скрытие окна до прихода любого `sl://` — без гонки с
+        // онбордингом окна (раньше замыкание ставилось из MainView.onAppear).
+        AppModel.shared.openMainWindow = { [weak self] in self?.showMainWindow() }
+        AppModel.shared.hideMainWindow = { [weak self] in self?.mainWindow?.orderOut(nil) }
+    }
+
     func application(_ application: NSApplication, open urls: [URL]) {
         var surfaceUI = false
         for url in urls where AppModel.shared.handleIncoming(url) { surfaceUI = true }
         if surfaceUI {
-            // Нужно взаимодействие (нет ссылки, пароль, недоступна) — показать приложение.
-            NSApp.activate(ignoringOtherApps: true)
-            AppModel.shared.openMainWindow?()
-        } else {
-            // Фоновый переход выполнен — не удерживать фокус на приложении.
-            NSApp.hide(nil)
+            // Нужно взаимодействие (нет ссылки, пароль, недоступна, подтверждение) —
+            // временно повысить политику до .regular и показать окно оверлея.
+            AppModel.shared.surfaceForInteraction(forRedirect: true)
         }
+        // Иначе фоновый переход уже выполнен: окно не создаётся вовсе, мигать нечему.
+    }
+
+    /// Лениво создать и показать главное окно (хост SwiftUI через NSHostingController).
+    func showMainWindow() {
+        if mainWindow == nil {
+            let hosting = NSHostingController(rootView: MainView().environment(AppModel.shared))
+            let window = NSWindow(contentViewController: hosting)
+            window.title = "Shortlinks"
+            window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
+            window.setContentSize(NSSize(width: 980, height: 680))
+            window.contentMinSize = NSSize(width: 880, height: 600)
+            window.isReleasedWhenClosed = false
+            window.delegate = self
+            window.center()
+            mainWindow = window
+        }
+        mainWindow?.makeKeyAndOrderFront(nil)
+    }
+
+    /// Закрытие окна возвращает приложение в фоновый режim (без иконки в Dock).
+    func windowWillClose(_ notification: Notification) {
+        AppModel.shared.returnToBackground()
     }
 }
 
@@ -24,13 +58,6 @@ struct ShortlinksApp: App {
     @State private var model = AppModel.shared
 
     var body: some Scene {
-        Window("Shortlinks", id: "main") {
-            MainView()
-                .environment(model)
-                .frame(minWidth: 880, minHeight: 600)
-        }
-        .windowResizability(.contentMinSize)
-
         MenuBarExtra("Shortlinks", systemImage: "link") {
             MenuBarContent()
                 .environment(model)
@@ -40,17 +67,20 @@ struct ShortlinksApp: App {
 
 struct MenuBarContent: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.openWindow) private var openWindow
+
+    /// Поднять окно из меню-бара: агент (.accessory) → .regular, показать окно.
+    /// `forRedirect: false` — окно открыто пользователем, авто-возврат в фон не нужен.
+    private func surface() {
+        model.surfaceForInteraction(forRedirect: false)
+    }
 
     var body: some View {
         Button("Новая ссылка") {
-            openWindow(id: "main")
-            NSApp.activate(ignoringOtherApps: true)
+            surface()
             model.openCreate()
         }
         Button("Открыть окно") {
-            openWindow(id: "main")
-            NSApp.activate(ignoringOtherApps: true)
+            surface()
         }
         Divider()
         let recent = Array(model.links.prefix(5))
@@ -59,8 +89,7 @@ struct MenuBarContent: View {
         } else {
             ForEach(recent) { link in
                 Button(link.fullURL) {
-                    openWindow(id: "main")
-                    NSApp.activate(ignoringOtherApps: true)
+                    surface()
                     model.openDetail(link.id)
                 }
             }

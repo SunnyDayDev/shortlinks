@@ -60,9 +60,14 @@ targets:
       properties:
         CFBundleDisplayName: Shortlinks
         CFBundleName: Shortlinks
-        # false = обычное приложение (Dock + меню-бар), надёжная работа окна и sl://.
-        # Поставьте true, чтобы сделать чистый фоновый агент только в меню-баре.
-        LSUIElement: false
+        # true = фоновый агент: только меню-бар, без постоянной иконки в Dock.
+        # Открытие sl:// в фоне (активная многоразовая ссылка без пароля) проходит тихо.
+        # Когда нужен UI (пароль/ненайдена/заблокирована/подтверждение), приложение
+        # временно повышается до .regular через NSApp.setActivationPolicy и показывает
+        # окно, затем возвращается в .accessory. Запуск самого процесса-обработчика
+        # неустраним: macOS резолвит схему sl через LaunchServices. См. change
+        # deeplink-silent-open.
+        LSUIElement: true
         LSMinimumSystemVersion: "14.0"
         NSHumanReadableCopyright: ""
         CFBundleURLTypes:

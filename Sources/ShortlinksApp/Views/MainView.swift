@@ -3,7 +3,6 @@ import ShortlinksCore
 
 struct MainView: View {
     @Environment(AppModel.self) private var model
-    @Environment(\.openWindow) private var openWindow
     @State private var showBulkDeleteConfirm = false
 
     var body: some View {
@@ -41,7 +40,6 @@ struct MainView: View {
             Text("Команда станет доступна в терминале (симлинк в ~/.local/bin, без пароля администратора). Это можно сделать позже в Настройках.")
         }
         .onAppear {
-            model.openMainWindow = { openWindow(id: "main") }
             model.maybeOfferCLIOnboarding()
         }
     }

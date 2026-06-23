@@ -47,7 +47,20 @@ final class AppModel {
     var toast: String?
 
     // Redirect overlay
-    var redirectSlug: String?
+    var redirectSlug: String? {
+        didSet {
+            // Оверлей перехода закрылся. Если окно поднимали только ради этого
+            // оверлея (из фона), возвращаем приложение в фоновый режим.
+            if redirectSlug == nil, surfacedForRedirect {
+                surfacedForRedirect = false
+                returnToBackground()
+            }
+        }
+    }
+
+    /// true, если текущий показ окна вызван открытием `sl://` из фона (а не
+    /// пользователем из меню-бара). Управляет авто-возвратом в `.accessory`.
+    private var surfacedForRedirect = false
     var redirectPhase: RedirectPhase = .ready
     var redirectNotFound = false
     var redirectPasswordInput = ""
@@ -70,8 +83,10 @@ final class AppModel {
     var showCLIOnboarding = false
     var cliPathExportLine: String { cli.pathExportLine }
 
-    /// Установлено сценой — открывает главное окно (для оверлея/подтверждения).
+    /// Установлено AppDelegate — показывает главное окно (для оверлея/подтверждения).
     var openMainWindow: (() -> Void)?
+    /// Установлено AppDelegate — прячет главное окно (возврат в фон).
+    var hideMainWindow: (() -> Void)?
 
     private var toastTask: Task<Void, Never>?
 
@@ -340,6 +355,26 @@ final class AppModel {
     }
 
     func closeRedirect() { redirectSlug = nil }
+
+    // MARK: - Activation policy (agent ↔ regular)
+
+    /// Поднять окно для взаимодействия: временно перевести приложение в `.regular`,
+    /// активировать и показать главное окно. Если повышение пришло из фона (открытие
+    /// `sl://`), запоминаем это, чтобы по закрытии оверлея вернуться в `.accessory`.
+    func surfaceForInteraction(forRedirect: Bool) {
+        let wasAccessory = NSApp.activationPolicy() == .accessory
+        if forRedirect, wasAccessory { surfacedForRedirect = true }
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        openMainWindow?()
+    }
+
+    /// Вернуть приложение в фоновый режим: спрятать окно и убрать иконку из Dock.
+    func returnToBackground() {
+        surfacedForRedirect = false
+        hideMainWindow?()
+        NSApp.setActivationPolicy(.accessory)
+    }
 
     // MARK: - Utilities
 

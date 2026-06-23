@@ -23,8 +23,16 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
   - `Link` + `LinkKind`/`LinkStatus`, `StorageLocation`, `LinkStore`
     (CRUD над единым `links.json` через `NSFileCoordinator`, атомарная запись),
     `Slug`, `Scheme`, `Password` (соль+SHA-256), `ConflictMerge`.
-- **ShortlinksApp** — SwiftUI: `MenuBarExtra` + `Window`, `ActivationPolicy.accessory`;
-  экраны по макету `_design/`; обработка `.onOpenURL` для `sl://`.
+- **ShortlinksApp** — SwiftUI `MenuBarExtra` + **единственное окно через AppKit**
+  (`AppDelegate`, `NSWindow` + `NSHostingController`, лениво). Фоновый агент
+  (`LSUIElement: true`) — без постоянной иконки в Dock. Сцена SwiftUI `Window` НЕ
+  используется намеренно: она выводит окно при запуске, из-за чего тихий переход по
+  `sl://` мигал бы окном. Обработка `sl://` — `AppDelegate.application(_:open:)`. Тихий
+  фоновый переход (активная многоразовая ссылка без пароля) идёт вообще без создания
+  окна; когда нужен UI (пароль/ненайдена/заблокирована/подтверждение) —
+  `surfaceForInteraction` поднимает политику до `.regular` и показывает окно, а по
+  закрытии оверлея/окна `AppModel.returnToBackground` прячет окно и возвращает
+  `.accessory`. Экраны — по макету `_design/`.
 - **shortlinks-cli** — `swift-argument-parser`; команды add/list/rm/open/resolve.
   CLI **вкладывается внутрь** `Shortlinks.app` (`Contents/Helpers/shortlinks`, copy-фаза
   app-таргета) — отдельная установка не нужна. Путь `Helpers` (не `Contents/MacOS`)
@@ -52,6 +60,10 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 - Хранилище — **один файл** `links.json` (не SQLite, не файл-на-ссылку); запись через
   координированное read-modify-write; конфликты iCloud сливаются по `id` ссылки.
 - Схема `sl://` вместо HTTP-сервера; регистрация через `CFBundleURLTypes`.
+- Приложение — фоновый агент (`LSUIElement`), переход по `sl://` тихий. Полностью «не
+  запускать приложение» при открытии `sl://` **нельзя**: macOS резолвит кастомную схему
+  через LaunchServices и обязана запустить процесс-обработчик. Достижимо лишь убрать
+  видимость запуска (иконку в Dock, перехват фокуса) — см. change `deeplink-silent-open`.
 - Без entitlements (нет App Sandbox / iCloud-capability) — бесплатный Apple ID.
 - Подпись — самоподписанный сертификат, `CODE_SIGN_STYLE: Manual`.
 - Одноразовая ссылка по умолчанию «сгорает» (`viewed`); удаление — опция в Настройках.
