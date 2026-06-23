@@ -11,53 +11,50 @@ struct HowItWorksView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Text("Короткая ссылка, которая живёт на вашем Mac")
-                .font(.system(size: 22, weight: .bold))
+                .font(Typography.display)
             Text("Вы создаёте адрес вида sl://link/имя. Когда его открывают, система ловит схему и перенаправляет на полную цель — приложение, файл или сайт.")
-                .font(.system(size: 14))
-                .foregroundStyle(Color.secondary)
+                .font(Typography.bodyLarge)
+                .foregroundStyle(Theme.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: 560, alignment: .leading)
-                .padding(.top, 8)
+                .frame(maxWidth: Size.proseMaxWidth, alignment: .leading)
+                .padding(.top, Spacing.s8)
 
-            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 2), spacing: 12) {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: Spacing.s12), count: 2), spacing: Spacing.s12) {
                 ForEach(steps, id: \.0) { step in
                     VStack(alignment: .leading, spacing: 0) {
                         Text(step.0)
-                            .font(.system(size: 13, weight: .bold))
-                            .foregroundStyle(.white)
-                            .frame(width: 26, height: 26)
-                            .background(step.3, in: RoundedRectangle(cornerRadius: 8))
-                        Text(step.1).font(.system(size: 14, weight: .semibold)).padding(.top, 11)
+                            .font(Typography.bodyEmphasis)
+                            .foregroundStyle(Theme.onAccent)
+                            .frame(width: Size.stepBadge, height: Size.stepBadge)
+                            .background(step.3, in: RoundedRectangle(cornerRadius: Radius.md))
+                        Text(step.1).font(Typography.sectionTitle).padding(.top, Spacing.s12)
                         Text(step.2)
-                            .font(.system(size: 12))
-                            .foregroundStyle(Theme.secondaryText)
+                            .font(Typography.caption)
+                            .foregroundStyle(Theme.textSecondary)
                             .fixedSize(horizontal: false, vertical: true)
-                            .padding(.top, 5)
+                            .padding(.top, Spacing.s6)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(16)
-                    .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 12))
-                    .overlay(RoundedRectangle(cornerRadius: 12).stroke(Theme.cardBorder, lineWidth: 0.5))
+                    .padding(Spacing.s16)
+                    .card()
                 }
             }
-            .padding(.top, 26)
+            .padding(.top, Spacing.s26)
 
-            HStack(spacing: 14) {
+            HStack(spacing: Spacing.s14) {
                 Text("sl://link/demo")
-                    .font(.system(size: 13, design: .monospaced)).foregroundStyle(Theme.accent)
-                Image(systemName: "arrow.right").foregroundStyle(Color.secondary)
+                    .font(Typography.mono).foregroundStyle(Theme.accent)
+                Image(systemName: "arrow.right").foregroundStyle(Theme.textSecondary)
                 Text("https://example.com/very/long/target?token=…")
-                    .font(.system(size: 13, design: .monospaced))
-                    .foregroundStyle(Color.secondary)
+                    .font(Typography.mono)
+                    .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)
             }
-            .padding(16)
+            .padding(Spacing.s16)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(hex: 0x2A6FDB, alpha: 0.05), in: RoundedRectangle(cornerRadius: 12))
-            .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(hex: 0x2A6FDB, alpha: 0.25), lineWidth: 0.5))
-            .padding(.top, 24)
+            .card(fill: Theme.infoBg, stroke: Theme.infoBorder)
+            .padding(.top, Spacing.s24)
         }
-        .padding(.horizontal, 24).padding(.top, 22).padding(.bottom, 32)
-        .frame(maxWidth: 760, alignment: .leading)
+        .screenContainer(maxWidth: Size.howMaxWidth, top: Spacing.s22)
     }
 }

@@ -22,11 +22,11 @@ struct MainView: View {
                 VStack {
                     Spacer()
                     Text(toast)
-                        .font(.system(size: 12.5, weight: .medium))
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 16).padding(.vertical, 9)
-                        .background(Color(hex: 0x1C1C1E, alpha: 0.92), in: RoundedRectangle(cornerRadius: 9))
-                        .padding(.bottom, 18)
+                        .font(Typography.captionMedium)
+                        .foregroundStyle(Theme.onAccent)
+                        .padding(.horizontal, Spacing.s16).padding(.vertical, Spacing.s8)
+                        .background(Theme.toastBg, in: RoundedRectangle(cornerRadius: Radius.md))
+                        .padding(.bottom, Spacing.s18)
                 }
                 .transition(.opacity)
             }
@@ -54,7 +54,7 @@ struct MainView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(nsColor: .textBackgroundColor))
+        .background(Theme.content)
         .confirmationDialog(
             "Удалить \(model.selection.count) \(Format.plural(model.selection.count, ["ссылку", "ссылки", "ссылок"]))?",
             isPresented: $showBulkDeleteConfirm,
@@ -73,26 +73,26 @@ struct MainView: View {
     /// Цвет иконки-переключателя режима в тулбаре.
     private var editIconColor: Color {
         guard model.editing else { return Theme.accent }
-        return model.canDeleteSelected ? Color(hex: 0xC0392B) : Theme.secondaryText
+        return model.canDeleteSelected ? Theme.destructive : Theme.textSecondary
     }
 
     private var bulkBar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.s12) {
             Text("Выбрано: \(model.selection.count)")
-                .font(.system(size: 13))
-                .foregroundStyle(Theme.secondaryText)
+                .font(Typography.body)
+                .foregroundStyle(Theme.textSecondary)
             Spacer()
             Button(action: { withAnimation(.easeInOut(duration: 0.22)) { model.toggleEditing() } }) {
                 Text("Готово")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(Typography.bodyEmphasis)
                     .foregroundStyle(Theme.accent)
-                    .padding(.horizontal, 14).frame(height: 30)
+                    .padding(.horizontal, Spacing.s12).frame(height: Size.controlHeight)
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
         }
-        .padding(.horizontal, 16)
-        .frame(height: 48)
+        .padding(.horizontal, Spacing.s16)
+        .frame(height: Size.bulkBarHeight)
         .background(.bar)
         .overlay(Divider(), alignment: .top)
         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -113,24 +113,24 @@ struct MainView: View {
 
     private var toolbar: some View {
         @Bindable var model = model
-        return HStack(spacing: 12) {
+        return HStack(spacing: Spacing.s12) {
             Text(model.toolbarTitle)
-                .font(.system(size: 15, weight: .bold))
+                .font(Typography.headline)
                 .lineLimit(1)
-                .frame(maxWidth: 360, alignment: .leading)
+                .frame(maxWidth: Size.toolbarTitleMaxWidth, alignment: .leading)
             Spacer()
             if model.screen == .library && model.selectedLink == nil {
-                HStack(spacing: 6) {
+                HStack(spacing: Spacing.s6) {
                     Image(systemName: "magnifyingglass")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Theme.secondaryText)
+                        .font(Typography.glyphSmall)
+                        .foregroundStyle(Theme.textSecondary)
                     TextField("Поиск", text: $model.query)
                         .textFieldStyle(.plain)
-                        .font(.system(size: 13))
+                        .font(Typography.body)
                 }
-                .padding(.horizontal, 10)
-                .frame(width: 200, height: 30)
-                .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: 7))
+                .padding(.horizontal, Spacing.s8)
+                .frame(width: Size.searchWidth, height: Size.controlHeight)
+                .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: Radius.md))
 
                 if !model.filteredLinks.isEmpty {
                     Button(action: {
@@ -141,10 +141,10 @@ struct MainView: View {
                         }
                     }) {
                         Image(systemName: model.editing ? "trash" : "square.and.pencil")
-                            .font(.system(size: 14, weight: .medium))
+                            .font(Typography.glyphAction)
                             .foregroundStyle(editIconColor)
-                            .frame(width: 30, height: 30)
-                            .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: 7))
+                            .frame(width: Size.controlHeight, height: Size.controlHeight)
+                            .background(Theme.subtleFill, in: RoundedRectangle(cornerRadius: Radius.md))
                             .contentShape(Rectangle())
                     }
                     .buttonStyle(.plain)
@@ -154,18 +154,14 @@ struct MainView: View {
             }
 
             Button(action: { model.openCreate() }) {
-                HStack(spacing: 5) {
+                HStack(spacing: Spacing.s6) {
                     Image(systemName: "plus")
                     Text("Новая ссылка")
                 }
-                .font(.system(size: 13, weight: .semibold))
-                .foregroundStyle(.white)
-                .padding(.horizontal, 13).frame(height: 30)
-                .background(Theme.accent, in: RoundedRectangle(cornerRadius: 7))
             }
-            .buttonStyle(.plain)
+            .buttonStyle(PrimaryButtonStyle(size: .small))
         }
-        .padding(.horizontal, 16)
-        .frame(height: 52)
+        .padding(.horizontal, Spacing.s16)
+        .frame(height: Size.toolbarHeight)
     }
 }

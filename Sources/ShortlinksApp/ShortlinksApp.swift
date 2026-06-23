@@ -53,8 +53,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             let window = NSWindow(contentViewController: hosting)
             window.title = "Shortlinks"
             window.styleMask = [.titled, .closable, .miniaturizable, .resizable]
-            window.setContentSize(NSSize(width: 980, height: 680))
-            window.contentMinSize = NSSize(width: 880, height: 600)
+            window.setContentSize(NSSize(width: Size.windowWidth, height: Size.windowHeight))
+            window.contentMinSize = NSSize(width: Size.windowMinWidth, height: Size.windowMinHeight)
             window.isReleasedWhenClosed = false
             window.delegate = self
             window.center()
