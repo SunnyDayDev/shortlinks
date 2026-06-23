@@ -64,7 +64,7 @@ struct LinkRow: View {
                     .foregroundStyle(selected ? Theme.accent : Theme.textSecondary)
                     .transition(.move(edge: .leading).combined(with: .opacity))
             }
-            TargetIcon(target: link.target)
+            TargetIcon(target: link.target, masked: link.isProtected)
             VStack(alignment: .leading, spacing: Spacing.s4) {
                 HStack(spacing: 0) {
                     Text("sl://link/").foregroundStyle(Theme.textSecondary)
@@ -73,7 +73,7 @@ struct LinkRow: View {
                 .font(Typography.mono)
                 .lineLimit(1)
 
-                Text(link.target)
+                Text(link.isProtected ? Strings.Common.targetMask : link.target)
                     .font(Typography.caption)
                     .foregroundStyle(Theme.textSecondary)
                     .lineLimit(1)

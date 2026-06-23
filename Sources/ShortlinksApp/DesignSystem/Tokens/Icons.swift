@@ -48,6 +48,12 @@ enum Icons {
         static let privacy = "lock.fill"
     }
 
+    /// Показать / скрыть защищённое значение.
+    enum Reveal {
+        static let show = "eye"
+        static let hide = "eye.slash"
+    }
+
     /// Иконка приложения в меню-баре.
     static let menuBar = "link"
 }

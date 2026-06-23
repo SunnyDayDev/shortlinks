@@ -25,7 +25,7 @@ struct LinkDetailView: View {
             .padding(.bottom, Spacing.s18)
 
             HStack(spacing: Spacing.s14) {
-                TargetIcon(target: link.target, size: Size.detailIcon)
+                TargetIcon(target: link.target, size: Size.detailIcon, masked: link.isProtected)
                 VStack(alignment: .leading, spacing: Spacing.s8) {
                     Text(link.fullURL)
                         .font(Typography.monoTitle)
@@ -68,7 +68,14 @@ struct LinkDetailView: View {
 
     private func infoCard(_ link: Link, status: LinkStatus) -> some View {
         VStack(spacing: 0) {
-            InfoRow(label: Strings.Detail.redirectsTo, value: link.target, mono: true)
+            if link.isProtected {
+                ProtectedTargetRow(label: Strings.Detail.redirectsTo,
+                                   target: link.target,
+                                   passwordHash: link.passwordHash ?? "")
+                    .id(link.id)
+            } else {
+                InfoRow(label: Strings.Detail.redirectsTo, value: link.target, mono: true)
+            }
             Divider()
             InfoRow(label: Strings.Detail.type, value: Format.kindLabel(link.kind))
             Divider()
@@ -106,5 +113,99 @@ struct LinkDetailView: View {
 
     private func created(_ link: Link) -> String {
         Format.dateTime(link.createdAt)
+    }
+}
+
+/// Строка деталей для цели защищённой ссылки: по умолчанию маска и «Показать»,
+/// раскрытие — после ввода верного пароля (`Password.verify`), с обратным «Скрыть».
+/// Состояние эфемерно и сбрасывается при смене ссылки — за счёт `.id(link.id)` на
+/// стороне `LinkDetailView`. Цель не выделяема и не копируется, пока скрыта.
+private struct ProtectedTargetRow: View {
+    let label: String
+    let target: String
+    let passwordHash: String
+
+    private enum Phase { case masked, prompting, revealed }
+    @State private var phase: Phase = .masked
+    @State private var passwordInput = ""
+    @State private var showError = false
+
+    var body: some View {
+        HStack(alignment: .top) {
+            Text(label)
+                .frame(width: Size.infoLabelWidth, alignment: .leading)
+                .foregroundStyle(Theme.textSecondary)
+            value
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(.horizontal, Spacing.s16).padding(.vertical, Spacing.s12)
+    }
+
+    @ViewBuilder
+    private var value: some View {
+        switch phase {
+        case .masked:
+            HStack(spacing: Spacing.s10) {
+                Text(Strings.Common.targetMask).font(Typography.monoSmall)
+                Spacer(minLength: Spacing.s10)
+                toggle(icon: Icons.Reveal.show, title: Strings.Detail.reveal) {
+                    showError = false
+                    passwordInput = ""
+                    phase = .prompting
+                }
+            }
+        case .prompting:
+            VStack(alignment: .leading, spacing: Spacing.s8) {
+                HStack(spacing: Spacing.s8) {
+                    SecureField(Strings.Common.password, text: $passwordInput)
+                        .textFieldStyle(.roundedBorder)
+                        .onSubmit(attemptReveal)
+                    Button(Strings.Detail.reveal, action: attemptReveal)
+                        .disabled(passwordInput.isEmpty)
+                    Button(Strings.Common.cancel) {
+                        passwordInput = ""
+                        showError = false
+                        phase = .masked
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.textSecondary)
+                }
+                if showError {
+                    Text(Strings.Toast.wrongPassword)
+                        .font(Typography.caption)
+                        .foregroundStyle(Theme.destructive)
+                }
+            }
+        case .revealed:
+            HStack(spacing: Spacing.s10) {
+                Text(target).font(Typography.monoSmall).textSelection(.enabled)
+                Spacer(minLength: Spacing.s10)
+                toggle(icon: Icons.Reveal.hide, title: Strings.Detail.hide) {
+                    phase = .masked
+                }
+            }
+        }
+    }
+
+    private func toggle(icon: String, title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: Spacing.s6) {
+                Image(systemName: icon)
+                Text(title)
+            }
+            .font(Typography.bodyMedium)
+            .foregroundStyle(Theme.accent)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func attemptReveal() {
+        guard Password.verify(passwordInput, against: passwordHash) else {
+            showError = true
+            return
+        }
+        passwordInput = ""
+        showError = false
+        phase = .revealed
     }
 }

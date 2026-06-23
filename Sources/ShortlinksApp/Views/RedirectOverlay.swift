@@ -40,15 +40,25 @@ struct RedirectOverlay: View {
         if let link = model.redirectLink {
             VStack(alignment: .leading, spacing: 0) {
                 Text(Strings.Redirect.confirmTitle).font(Typography.headline)
-                Text(Strings.Redirect.confirmBody)
-                    .font(Typography.body).foregroundStyle(Theme.textSecondary).padding(.top, Spacing.s6)
-                Text(link.target)
-                    .font(Typography.monoSmall)
-                    .textSelection(.enabled)
-                    .padding(Spacing.s12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .codeBox(bordered: true)
-                    .padding(.top, Spacing.s12)
+                if link.isProtected {
+                    // Защищённая ссылка: цель скрыта, показываем только запрос пароля.
+                    HStack(alignment: .top, spacing: Spacing.s8) {
+                        Image(systemName: Icons.Status.privacy).foregroundStyle(Theme.accent)
+                        Text(Strings.Redirect.protectedBody)
+                            .font(Typography.body).foregroundStyle(Theme.textSecondary)
+                    }
+                    .padding(.top, Spacing.s6)
+                } else {
+                    Text(Strings.Redirect.confirmBody)
+                        .font(Typography.body).foregroundStyle(Theme.textSecondary).padding(.top, Spacing.s6)
+                    Text(link.target)
+                        .font(Typography.monoSmall)
+                        .textSelection(.enabled)
+                        .padding(Spacing.s12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .codeBox(bordered: true)
+                        .padding(.top, Spacing.s12)
+                }
 
                 if link.kind == .once {
                     HStack(alignment: .top, spacing: Spacing.s8) {
@@ -73,7 +83,8 @@ struct RedirectOverlay: View {
                     Button(Strings.Common.cancel) { model.closeRedirect() }
                         .frame(maxWidth: .infinity)
                     Button(action: { model.confirmRedirect() }) {
-                        Text(Scheme.detect(link.target).openLabel)
+                        // Для защищённой ссылки — нейтральный ярлык: тип цели тоже не раскрываем.
+                        Text(link.isProtected ? Strings.List.open : Scheme.detect(link.target).openLabel)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)

@@ -22,6 +22,7 @@ public enum Strings {
         public static var notNow: String { L("common.notNow", "Не сейчас") }
         public static var lifetimeTitle: String { L("common.lifetime", "Срок действия") }
         public static var linkUnavailable: String { L("common.linkUnavailable", "Ссылка недоступна") }
+        public static var targetMask: String { L("common.targetMask", "••••••••") }
     }
 
     // MARK: - Статусы и типы
@@ -152,6 +153,8 @@ public enum Strings {
     public enum Detail {
         public static var back: String { L("detail.back", "Все ссылки") }
         public static var redirectsTo: String { L("detail.redirectsTo", "Перенаправляет на") }
+        public static var reveal: String { L("detail.reveal", "Показать") }
+        public static var hide: String { L("detail.hide", "Скрыть") }
         public static var type: String { L("detail.type", "Тип") }
         public static var opens: String { L("detail.opens", "Переходов") }
         public static var password: String { L("detail.password", "Пароль") }
@@ -166,6 +169,7 @@ public enum Strings {
     public enum Redirect {
         public static var confirmTitle: String { L("redirect.confirmTitle", "Открыть ссылку?") }
         public static var confirmBody: String { L("redirect.confirmBody", "Этот короткий адрес перенаправит вас на:") }
+        public static var protectedBody: String { L("redirect.protectedBody", "Эта ссылка защищена паролем. Введите пароль, чтобы открыть.") }
         public static var onceWarning: String { L("redirect.onceWarning", "Одноразовая ссылка. После перехода она станет недоступной.") }
         public static var consumedTitle: String { L("redirect.consumedTitle", "Открыто") }
         public static var consumedBody: String { L("redirect.consumedBody", "Переход выполнен. Эта одноразовая ссылка сгорела и больше недоступна.") }
