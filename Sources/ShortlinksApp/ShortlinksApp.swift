@@ -10,15 +10,26 @@ import ShortlinksCore
 /// без окна; окно появляется лишь когда нужен UI (меню-бар, пароль, оверлей перехода).
 final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     private var mainWindow: NSWindow?
+    /// Запущено ли приложение ради открытия `sl://` (а не кликом по иконке).
+    /// `application(_:open:)` приходит после `didFinishLaunching`, поэтому решение о
+    /// показе окна при обычном запуске откладываем на следующий тик рунлупа.
+    private var didOpenURLAtLaunch = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Привязываем показ/скрытие окна до прихода любого `sl://` — без гонки с
         // онбордингом окна (раньше замыкание ставилось из MainView.onAppear).
         AppModel.shared.openMainWindow = { [weak self] in self?.showMainWindow() }
         AppModel.shared.hideMainWindow = { [weak self] in self?.mainWindow?.orderOut(nil) }
+        // Обычный запуск (клик по иконке/Spotlight) показывает окно. Если запуск был
+        // ради `sl://`, к этому моменту `application(_:open:)` уже выставит флаг.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, !self.didOpenURLAtLaunch else { return }
+            AppModel.shared.surfaceForInteraction(forRedirect: false)
+        }
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {
+        didOpenURLAtLaunch = true
         var surfaceUI = false
         for url in urls where AppModel.shared.handleIncoming(url) { surfaceUI = true }
         if surfaceUI {
@@ -27,6 +38,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             AppModel.shared.surfaceForInteraction(forRedirect: true)
         }
         // Иначе фоновый переход уже выполнен: окно не создаётся вовсе, мигать нечему.
+    }
+
+    /// Повторный клик по иконке уже запущенного агента — показать/поднять окно.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        AppModel.shared.surfaceForInteraction(forRedirect: false)
+        return true
     }
 
     /// Лениво создать и показать главное окно (хост SwiftUI через NSHostingController).
