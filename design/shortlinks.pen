@@ -498,7 +498,10 @@
                       "content": "#work"
                     },
                     "Wcr5p": {
-                      "enabled": false
+                      "enabled": true
+                    },
+                    "Wcr5p/iXxWB": {
+                      "content": "#urgent"
                     }
                   }
                 },
@@ -585,7 +588,10 @@
                       "content": "#docs"
                     },
                     "Wcr5p": {
-                      "enabled": false
+                      "enabled": true
+                    },
+                    "Wcr5p/iXxWB": {
+                      "content": "#dev"
                     },
                     "JIigG": {
                       "fill": "$status-disabled-bg"
@@ -2006,7 +2012,7 @@
       "name": "Settings — Настройки",
       "clip": true,
       "width": 980,
-      "height": 960,
+      "height": 1000,
       "fill": "$content",
       "cornerRadius": 10,
       "children": [
@@ -2623,7 +2629,7 @@
                               "type": "frame",
                               "id": "YyY0m",
                               "name": "RedirectSeg",
-                              "width": 220,
+                              "width": 260,
                               "height": 26,
                               "fill": "$subtle-fill",
                               "cornerRadius": 7,
@@ -3769,7 +3775,7 @@
                   "type": "frame",
                   "id": "A7NxT",
                   "name": "HowContainer",
-                  "width": 760,
+                  "width": "fill_container",
                   "layout": "vertical",
                   "padding": [
                     22,
@@ -4720,7 +4726,10 @@
                       "content": "#work"
                     },
                     "Wcr5p": {
-                      "enabled": false
+                      "enabled": true
+                    },
+                    "Wcr5p/iXxWB": {
+                      "content": "#urgent"
                     }
                   }
                 },
@@ -4807,7 +4816,10 @@
                       "content": "#docs"
                     },
                     "Wcr5p": {
-                      "enabled": false
+                      "enabled": true
+                    },
+                    "Wcr5p/iXxWB": {
+                      "content": "#dev"
                     },
                     "JIigG": {
                       "fill": "$status-disabled-bg"
