@@ -80,13 +80,22 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 ## Конвенции
 
 - **Дизайн** — источник правды: Pencil-файл `design/shortlinks.pen` (акцент `#2A6FDB`).
-  Правится **только через Pencil MCP** (файл зашифрован — не `Read`/`grep`/`edit`).
-  Внутри: страница «Design System» (токены + мастера компонентов) и экраны, собранные
-  из их инстансов. Токены/компоненты зеркалят код `DesignSystem` под согласованными
-  именами (`accent` ↔ `Theme.accent`, `space-16` ↔ `Spacing.s16`, `Button/Primary` ↔
-  `PrimaryButtonStyle`). Изменение UI строится из существующих токенов/компонентов;
-  новый токен/компонент добавляется парно — в дизайн-файл и в код. См. change
-  `adopt-pencil-design-system`.
+  Файл — обычный JSON (`version`/`themes`/`variables`/`children`/`fileToken`): читается и
+  диффается штатно. **Авторские правки — через Pencil MCP** (чтобы сохранять инварианты:
+  уникальные `id`, целостность `ref`/`descendants`, схему `version`); ручная правка JSON —
+  только при разрешении merge-конфликта. Внутри: страница «Design System» (токены + мастера
+  компонентов) и экраны, собранные из их инстансов. Токены/компоненты зеркалят код
+  `DesignSystem` под согласованными именами (`accent` ↔ `Theme.accent`, `space-16` ↔
+  `Spacing.s16`, `Button/Primary` ↔ `PrimaryButtonStyle`). Изменение UI строится из
+  существующих токенов/компонентов; новый токен/компонент добавляется парно — в дизайн-файл
+  и в код. См. changes `adopt-pencil-design-system`, `pen-merge-safety`.
+- **Мерж `.pen`** безопасен (автомерж), только если: правки в *разных* top-level `children`
+  (разные экраны/области; добавление нового ребёнка — тоже ок); все `$var` есть в
+  `variables`; `id` глобально уникальны; каждый `ref`/`descendants` разрешается; правки
+  `variables`/`themes` аддитивны и `version` совпадает. Все мастера и токены — в одном
+  ребёнке «Design System», поэтому две ветки, обе меняющие дизайн-систему, конфликтуют →
+  ручной мерж. Иначе — ручное разрешение в JSON или выбор одного варианта файла целиком
+  (`git checkout --ours/--theirs`). Проверка: `python3 design/validate_pen.py`.
 - Доменную логику добавлять в ShortlinksCore, а не дублировать в app/CLI.
 - **Строки** — только через реестр `Strings` (ShortlinksCore) поверх `Localizable.xcstrings`;
   русский — язык-источник (`defaultValue`). Не хардкодить пользовательские литералы во
