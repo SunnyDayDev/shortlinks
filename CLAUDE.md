@@ -40,7 +40,7 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
   `.accessory`. Обычный запуск (клик по иконке/Spotlight) и reopen показывают окно:
   `applicationShouldHandleReopen` + отложенная проверка в `didFinishLaunching`
   (флаг `didOpenURLAtLaunch` отличает запуск ради `sl://` от клика по иконке). Экраны —
-  по макету `_design/`.
+  по дизайн-файлу `design/shortlinks.pen`.
 - **shortlinks-cli** — `swift-argument-parser`; команды add/list/rm/open/resolve.
   CLI **вкладывается внутрь** `Shortlinks.app` (`Contents/Helpers/shortlinks`, copy-фаза
   app-таргета) — отдельная установка не нужна. Путь `Helpers` (не `Contents/MacOS`)
@@ -79,7 +79,14 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 
 ## Конвенции
 
-- Цвета/вёрстка экранов — по макету `_design/Одноразовые ссылки.dc.html` (акцент `#2A6FDB`).
+- **Дизайн** — источник правды: Pencil-файл `design/shortlinks.pen` (акцент `#2A6FDB`).
+  Правится **только через Pencil MCP** (файл зашифрован — не `Read`/`grep`/`edit`).
+  Внутри: страница «Design System» (токены + мастера компонентов) и экраны, собранные
+  из их инстансов. Токены/компоненты зеркалят код `DesignSystem` под согласованными
+  именами (`accent` ↔ `Theme.accent`, `space-16` ↔ `Spacing.s16`, `Button/Primary` ↔
+  `PrimaryButtonStyle`). Изменение UI строится из существующих токенов/компонентов;
+  новый токен/компонент добавляется парно — в дизайн-файл и в код. См. change
+  `adopt-pencil-design-system`.
 - Доменную логику добавлять в ShortlinksCore, а не дублировать в app/CLI.
 - **Строки** — только через реестр `Strings` (ShortlinksCore) поверх `Localizable.xcstrings`;
   русский — язык-источник (`defaultValue`). Не хардкодить пользовательские литералы во
@@ -103,6 +110,8 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 - **Слияние** — merge-commit (`gh pr merge <n> --merge --delete-branch`): сохраняет
   связь PR↔коммиты. После мержа ветка удаляется, локальный `main` подтягивается
   (`git checkout main && git pull --ff-only`).
+- **UI и дизайн-файл**: PR, меняющий внешний вид приложения, включает обновление
+  `design/shortlinks.pen`; если визуальных изменений нет — отметить это в описании PR.
 - **Branch protection** для `main` технически **не включена**: на бесплатном плане
   GitHub она недоступна для приватного репозитория (нужен GitHub Pro или публичный
   репо). Поэтому правило «только через PR» соблюдается по договорённости, а не
