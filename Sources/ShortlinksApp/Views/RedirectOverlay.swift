@@ -40,6 +40,12 @@ struct RedirectOverlay: View {
         if let link = model.redirectLink {
             VStack(alignment: .leading, spacing: 0) {
                 Text(Strings.Redirect.confirmTitle).font(Typography.headline)
+                if let note = link.note, !note.isEmpty {
+                    Text(note)
+                        .font(Typography.body)
+                        .foregroundStyle(Theme.textPrimary)
+                        .padding(.top, Spacing.s6)
+                }
                 if link.isProtected {
                     // Защищённая ссылка: цель скрыта, показываем только запрос пароля.
                     HStack(alignment: .top, spacing: Spacing.s8) {

@@ -68,6 +68,10 @@ struct LinkDetailView: View {
 
     private func infoCard(_ link: Link, status: LinkStatus) -> some View {
         VStack(spacing: 0) {
+            if let note = link.note, !note.isEmpty {
+                InfoRow(label: Strings.Detail.note, value: note)
+                Divider()
+            }
             if link.isProtected {
                 ProtectedTargetRow(label: Strings.Detail.redirectsTo,
                                    target: link.target,

@@ -455,8 +455,13 @@
                     "XKgXv": {
                       "content": "design-brief"
                     },
+                    "EvNgP": {
+                      "enabled": true,
+                      "content": "Бриф по дизайну — общий Figma-файл проекта"
+                    },
                     "vkdpN": {
-                      "content": "https://www.figma.com/file/AbC123/Design-Brief"
+                      "content": "https://www.figma.com/file/AbC123/Design-Brief",
+                      "enabled": false
                     },
                     "ldUnw": {
                       "content": "Многоразовая · 12 переходов"
@@ -1214,6 +1219,30 @@
                       "layout": "vertical",
                       "children": [
                         {
+                          "id": "PGjcO",
+                          "type": "ref",
+                          "ref": "vwjHd",
+                          "name": "IR Description",
+                          "width": "fill_container",
+                          "descendants": {
+                            "MwM8q": {
+                              "content": "Описание"
+                            },
+                            "k5n8D": {
+                              "content": "Бриф по дизайну — общий Figma-файл проекта",
+                              "fontWeight": "400"
+                            }
+                          }
+                        },
+                        {
+                          "type": "rectangle",
+                          "id": "pMkW4",
+                          "name": "Div0",
+                          "fill": "$separator",
+                          "width": "fill_container",
+                          "height": 1
+                        },
+                        {
                           "id": "Tjj9B",
                           "type": "ref",
                           "ref": "vwjHd",
@@ -1666,6 +1695,56 @@
                           "fontWeight": "600"
                         }
                       ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VhVag",
+              "name": "FieldDescription",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "BJOBe",
+                  "name": "DescriptionLabel",
+                  "fill": "$text-secondary",
+                  "content": "Описание",
+                  "fontFamily": "$font-ui",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "THJmb",
+                  "name": "DescriptionBox",
+                  "width": "fill_container",
+                  "height": 56,
+                  "fill": "$content",
+                  "cornerRadius": "$radius-md",
+                  "stroke": "$separator",
+                  "strokeWidth": 0.5,
+                  "layout": "vertical",
+                  "padding": [
+                    8,
+                    12
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "MT33i",
+                      "name": "DescriptionPlaceholder",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Куда ведёт и что откроется",
+                      "fontFamily": "$font-ui",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -4683,8 +4762,13 @@
                     "XKgXv": {
                       "content": "design-brief"
                     },
+                    "EvNgP": {
+                      "enabled": true,
+                      "content": "Бриф по дизайну — общий Figma-файл проекта"
+                    },
                     "vkdpN": {
-                      "content": "https://www.figma.com/file/AbC123/Design-Brief"
+                      "content": "https://www.figma.com/file/AbC123/Design-Brief",
+                      "enabled": false
                     },
                     "ldUnw": {
                       "content": "Многоразовая · 12 переходов"
@@ -4946,6 +5030,33 @@
                       "fontFamily": "$font-ui",
                       "fontSize": 15,
                       "fontWeight": "700"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "m6QTBR",
+                      "name": "DescriptionRow",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "padding": [
+                        6,
+                        0,
+                        0,
+                        0
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "E4z8A",
+                          "name": "DialogDescription",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Секретный документ команды — реквизиты внутри",
+                          "fontFamily": "$font-ui",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
                       "type": "frame",
@@ -7320,7 +7431,8 @@
                           "fill": "$text-primary",
                           "content": "Одноразовые ссылки",
                           "fontFamily": "$font-ui",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -7351,7 +7463,8 @@
                           "fill": "$text-primary",
                           "content": "Одноразовые ссылки",
                           "fontFamily": "$font-ui",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -7446,7 +7559,8 @@
                           "fill": "$text-primary",
                           "content": "Одноразовые ссылки",
                           "fontFamily": "$font-ui",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -7541,7 +7655,8 @@
                           "fill": "$text-primary",
                           "content": "Одноразовые ссылки",
                           "fontFamily": "$font-ui",
-                          "fontSize": 11.5
+                          "fontSize": 11.5,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -7690,7 +7805,8 @@
                           "fill": "$text-primary",
                           "content": "sl://link/имя",
                           "fontFamily": "$font-mono",
-                          "fontSize": 15
+                          "fontSize": 15,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -7721,7 +7837,8 @@
                           "fill": "$text-primary",
                           "content": "sl://link/имя",
                           "fontFamily": "$font-mono",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -7752,7 +7869,8 @@
                           "fill": "$text-primary",
                           "content": "sl://link/имя",
                           "fontFamily": "$font-mono",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -9327,6 +9445,21 @@
                                   "fontWeight": "normal"
                                 }
                               ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "EvNgP",
+                              "x": 0,
+                              "y": 0,
+                              "name": "RowDescription",
+                              "enabled": false,
+                              "fill": "$text-primary",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container(0)",
+                              "content": "Описание ссылки",
+                              "fontFamily": "$font-ui",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             },
                             {
                               "type": "text",

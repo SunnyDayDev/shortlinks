@@ -132,6 +132,8 @@ public enum Strings {
         public static var typeLabel: String { L("create.typeLabel", "Тип") }
         public static var tagsLabel: String { L("create.tagsLabel", "Метки") }
         public static var addTag: String { L("create.addTag", "Добавить метку…") }
+        public static var noteLabel: String { L("create.noteLabel", "Описание") }
+        public static var notePlaceholder: String { L("create.notePlaceholder", "Куда ведёт и что откроется") }
         public static var passwordProtect: String { L("create.passwordProtect", "Защитить паролем") }
         public static var passwordHint: String { L("create.passwordHint", "Запросить пароль перед переходом") }
         public static var submit: String { L("create.submit", "Создать ссылку") }
@@ -161,6 +163,7 @@ public enum Strings {
         public static var passwordOn: String { L("detail.passwordOn", "Включён") }
         public static var passwordOff: String { L("detail.passwordOff", "Нет") }
         public static var tags: String { L("detail.tags", "Метки") }
+        public static var note: String { L("detail.note", "Описание") }
         public static var created: String { L("detail.created", "Создана") }
     }
 
@@ -273,6 +276,7 @@ public enum Strings {
         public static var addTTL: String { L("cli.add.ttl", "Срок действия: 1h | 24h | 7d | never") }
         public static var addPassword: String { L("cli.add.password", "Пароль, запрашиваемый перед переходом") }
         public static var addTag: String { L("cli.add.tag", "Тег (можно повторять)") }
+        public static var addNote: String { L("cli.add.note", "Описание ссылки: что это и куда ведёт") }
         public static var errBothFlags: String { L("cli.add.errBothFlags", "Укажите только один из флагов --once / --reuse") }
         public static var errTTL: String { L("cli.add.errTTL", "Некорректный --ttl. Допустимо: 1h, 24h, 7d, never") }
 

@@ -25,6 +25,7 @@ struct CreateForm {
     var password = ""
     var tags: [String] = []
     var tagInput = ""
+    var note = ""
 }
 
 @Observable
@@ -139,6 +140,7 @@ final class AppModel {
                 let hit = link.slug.lowercased().contains(q)
                     || link.target.lowercased().contains(q)
                     || link.tags.contains { $0.contains(q) }
+                    || (link.note?.lowercased().contains(q) ?? false)
                 if !hit { return false }
             }
             return true
@@ -226,7 +228,8 @@ final class AppModel {
             kind: form.kind,
             lifetime: form.lifetime,
             password: form.passwordOn ? form.password : nil,
-            tags: tags
+            tags: tags,
+            note: form.note
         )
         store.add(link)
         reload()

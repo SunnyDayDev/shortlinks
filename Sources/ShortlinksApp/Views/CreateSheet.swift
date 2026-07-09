@@ -49,6 +49,16 @@ struct CreateSheet: View {
                         .fieldBox()
                     }
 
+                    LabeledField(Strings.Create.noteLabel) {
+                        TextField(Strings.Create.notePlaceholder, text: $model.form.note, axis: .vertical)
+                            .textFieldStyle(.plain)
+                            .font(Typography.body)
+                            .lineLimit(2...4)
+                            .padding(.horizontal, Spacing.s12).padding(.vertical, Spacing.s8)
+                            .frame(maxWidth: .infinity, minHeight: Size.fieldHeight, alignment: .topLeading)
+                            .fieldBox()
+                    }
+
                     HStack(spacing: Spacing.s16) {
                         LabeledField(Strings.Create.typeLabel) {
                             Picker("", selection: $model.form.kind) {
