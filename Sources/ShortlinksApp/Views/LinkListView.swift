@@ -73,10 +73,17 @@ struct LinkRow: View {
                 .font(Typography.mono)
                 .lineLimit(1)
 
-                Text(link.isProtected ? Strings.Common.targetMask : link.target)
-                    .font(Typography.caption)
-                    .foregroundStyle(Theme.textSecondary)
-                    .lineLimit(1)
+                if let note = link.note, !note.isEmpty {
+                    Text(note)
+                        .font(Typography.caption)
+                        .foregroundStyle(Theme.textPrimary)
+                        .lineLimit(1)
+                } else {
+                    Text(link.isProtected ? Strings.Common.targetMask : link.target)
+                        .font(Typography.caption)
+                        .foregroundStyle(Theme.textSecondary)
+                        .lineLimit(1)
+                }
 
                 Text(Format.subtitle(link))
                     .font(Typography.caption2)

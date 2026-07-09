@@ -88,4 +88,37 @@ final class LinkTests: XCTestCase {
         let decoded = try decoder.decode(Link.self, from: encoder.encode(link))
         XCTAssertEqual(decoded, link)
     }
+
+    func testNoteRoundTrip() throws {
+        let link = Link.make(target: "https://a", slug: "s", kind: .reuse,
+                             lifetime: .never, note: "Бриф по дизайну", now: t0)
+        XCTAssertEqual(link.note, "Бриф по дизайну")
+        let encoder = JSONEncoder(); encoder.dateEncodingStrategy = .iso8601
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        let decoded = try decoder.decode(Link.self, from: encoder.encode(link))
+        XCTAssertEqual(decoded.note, "Бриф по дизайну")
+        XCTAssertEqual(decoded, link)
+    }
+
+    func testDecodesLegacyJSONWithoutNote() throws {
+        // Старый формат без поля note читается как ссылка без описания.
+        let json = """
+        {"id":"n1","slug":"s","target":"https://a","kind":"reuse","opens":0,
+         "createdAt":"1970-01-12T13:46:40Z","tags":[]}
+        """
+        let decoder = JSONDecoder(); decoder.dateDecodingStrategy = .iso8601
+        let link = try decoder.decode(Link.self, from: Data(json.utf8))
+        XCTAssertNil(link.note)
+    }
+
+    func testMakeTrimsAndNilsEmptyNote() {
+        let blank = Link.make(target: "x", slug: "s", kind: .reuse, lifetime: .never, note: "   \n ", now: t0)
+        XCTAssertNil(blank.note)
+
+        let padded = Link.make(target: "x", slug: "s", kind: .reuse, lifetime: .never, note: "  привет  ", now: t0)
+        XCTAssertEqual(padded.note, "привет")
+
+        let none = Link.make(target: "x", slug: "s", kind: .reuse, lifetime: .never, now: t0)
+        XCTAssertNil(none.note)
+    }
 }

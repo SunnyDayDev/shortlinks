@@ -54,6 +54,9 @@ struct Add: ParsableCommand {
     @Option(name: [.customShort("g"), .long], help: ArgumentHelp(Strings.CLI.addTag))
     var tag: [String] = []
 
+    @Option(help: ArgumentHelp(Strings.CLI.addNote))
+    var note: String?
+
     func run() throws {
         if once && reuse {
             throw ValidationError(Strings.CLI.errBothFlags)
@@ -69,7 +72,8 @@ struct Add: ParsableCommand {
             kind: kind,
             lifetime: lifetime,
             password: password,
-            tags: tag
+            tags: tag,
+            note: note
         )
         LinkStore(watch: false).add(link)
         print(link.fullURL)
@@ -109,6 +113,9 @@ struct ListCmd: ParsableCommand {
             let status = Format.statusLabel(link.status(now: now))
             let kind = link.kind == .once ? "once " : "reuse"
             print("\(link.fullURL)  [\(kind) · \(status)]  → \(link.target)")
+            if let note = link.note, !note.isEmpty {
+                print("    \(note)")
+            }
         }
     }
 }

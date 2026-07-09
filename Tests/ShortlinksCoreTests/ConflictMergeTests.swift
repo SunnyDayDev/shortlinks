@@ -51,4 +51,15 @@ final class ConflictMergeTests: XCTestCase {
         XCTAssertEqual(ConflictMerge.merge([]).count, 0)
         XCTAssertEqual(ConflictMerge.merge([[]]).count, 0)
     }
+
+    func testResolvePreservesNoteOfWinner() {
+        // Слияние идёт целой записью по id: победитель (больше переходов) сохраняет своё описание.
+        let few = Link(id: "a", slug: "a", target: "https://a", kind: .reuse,
+                       opens: 1, createdAt: t0, note: "мало")
+        let many = Link(id: "a", slug: "a", target: "https://a", kind: .reuse,
+                        opens: 9, createdAt: t0, note: "много")
+        let merged = ConflictMerge.merge([[few], [many]])
+        XCTAssertEqual(merged.count, 1)
+        XCTAssertEqual(merged[0].note, "много")
+    }
 }

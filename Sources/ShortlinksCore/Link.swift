@@ -44,6 +44,7 @@ public struct Link: Codable, Identifiable, Sendable, Hashable {
     public var consumedAt: Date?      // проставляется при потреблении одноразовой
     public var passwordHash: String?  // формат "salt:hex(sha256(salt+password))"
     public var tags: [String]
+    public var note: String?          // необязательное описание: что это за ссылка / что откроется
     public var disabledAt: Date?      // момент ручной деактивации; nil = активна
 
     public init(
@@ -57,6 +58,7 @@ public struct Link: Codable, Identifiable, Sendable, Hashable {
         consumedAt: Date? = nil,
         passwordHash: String? = nil,
         tags: [String] = [],
+        note: String? = nil,
         disabledAt: Date? = nil
     ) {
         self.id = id
@@ -69,6 +71,7 @@ public struct Link: Codable, Identifiable, Sendable, Hashable {
         self.consumedAt = consumedAt
         self.passwordHash = passwordHash
         self.tags = tags
+        self.note = note
         self.disabledAt = disabledAt
     }
 
@@ -92,10 +95,12 @@ public struct Link: Codable, Identifiable, Sendable, Hashable {
         lifetime: Lifetime,
         password: String? = nil,
         tags: [String] = [],
+        note: String? = nil,
         now: Date = Date()
     ) -> Link {
         let expires = lifetime.seconds.map { now.addingTimeInterval($0) }
         let hash = password.flatMap { $0.isEmpty ? nil : Password.hash($0) }
+        let cleanedNote = note?.trimmingCharacters(in: .whitespacesAndNewlines)
         return Link(
             id: "n" + String(Int(now.timeIntervalSince1970 * 1000)),
             slug: slug,
@@ -106,7 +111,8 @@ public struct Link: Codable, Identifiable, Sendable, Hashable {
             expiresAt: expires,
             consumedAt: nil,
             passwordHash: hash,
-            tags: tags
+            tags: tags,
+            note: (cleanedNote?.isEmpty ?? true) ? nil : cleanedNote
         )
     }
 }
