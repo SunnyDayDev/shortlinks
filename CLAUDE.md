@@ -103,7 +103,8 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
   на новый язык — запись в каталог + `CFBundleLocalizations` в `project.yml`, без правок кода.
   Язык: системный, плюс `LANG`/`LC_*`/`--lang` в CLI (приоритет — см. `Localization`).
 - **Иконки** — только через реестр `Icons` (DesignSystem); не хардкодить имена SF Symbols во вью.
-- Идентификаторы: схема `sl`, bundle id приложения `com.tsikin.Shortlinks`.
+- Идентификаторы: схема `sl`, bundle id приложения `com.shortlinks.app`
+  (CLI — `com.shortlinks.cli`, framework — `com.shortlinks.core`; см. `project.yml`).
 
 ## Git-процесс (gitflow)
 
