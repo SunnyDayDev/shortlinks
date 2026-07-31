@@ -12,6 +12,9 @@ xcodebuild -project Shortlinks.xcodeproj -scheme ShortlinksApp build
 xcodebuild -project Shortlinks.xcodeproj -scheme shortlinks-cli -configuration Release build
 xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO   # юнит-тесты ShortlinksCore
+bash Scripts/ds-lint.sh                             # линт дизайн-системы (сырые значения во вью)
+python3 design/validate_pen.py                      # инварианты дизайн-файла .pen
+swift tools/make_icon.swift                         # перегенерировать AppIcon в Assets.xcassets
 ```
 
 `Shortlinks.xcodeproj` генерируется и НЕ коммитится — правьте `project.yml`, затем
@@ -19,7 +22,7 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 
 ## Модули (`Sources/`)
 
-- **ShortlinksCore** (framework) — вся доменная логика, переиспользуется app и CLI:
+- **ShortlinksCore** (`library.static`) — вся доменная логика, переиспользуется app и CLI:
   - `Link` + `LinkKind`/`LinkStatus`, `StorageLocation`, `LinkStore`
     (CRUD над единым `links.json` через `NSFileCoordinator`, атомарная запись),
     `Slug`, `Scheme`, `Password` (соль+SHA-256), `ConflictMerge`.
@@ -57,9 +60,10 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 
 - Локально: `xcodebuild test -scheme ShortlinksCoreTests … CODE_SIGNING_ALLOWED=NO`
   (см. Команды). Подпись отключаем — самоподписанный серт для тест-бандла не нужен.
-- CI: `.github/workflows/ci.yml` на `macos-14` ставит XcodeGen, генерирует проект и
-  прогоняет `ShortlinksCoreTests` при PR в `main` и push в `main`. GUI-приложение на CI
-  не собирается (нужен самоподписанный сертификат) — проверяется логика ядра.
+- CI: `.github/workflows/ci.yml` на `macos-15` выбирает свежий Xcode, ставит XcodeGen,
+  генерирует проект и прогоняет `ShortlinksCoreTests` при PR в `main` и push в `main`.
+  GUI-приложение на CI не собирается (нужен самоподписанный сертификат) — проверяется
+  логика ядра.
 - Required status checks технически не enforce'ятся (free private, как и branch
   protection) — красный CI блокирует мерж по договорённости.
 
@@ -79,16 +83,20 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 
 ## Конвенции
 
-- **Дизайн** — источник правды: Pencil-файл `design/shortlinks.pen` (акцент `#2A6FDB`).
+- **Дизайн** — источник правды: `.pen`-файл `design/shortlinks.pen` (акцент `#2A6FDB`),
+  макет редактора **Pen** (прежнее название — Pencil; MCP-сервер по-прежнему называется
+  `pencil`). Прежний HTML-макет `_design/` удалён — он есть только в истории git.
   Файл — обычный JSON (`version`/`themes`/`variables`/`children`/`fileToken`): читается и
-  диффается штатно. **Авторские правки — через Pencil MCP** (чтобы сохранять инварианты:
+  диффается штатно. **Авторские правки — через Pen MCP** (чтобы сохранять инварианты:
   уникальные `id`, целостность `ref`/`descendants`, схему `version`); ручная правка JSON —
   только при разрешении merge-конфликта. Внутри: страница «Design System» (токены + мастера
   компонентов) и экраны, собранные из их инстансов. Токены/компоненты зеркалят код
   `DesignSystem` под согласованными именами (`accent` ↔ `Theme.accent`, `space-16` ↔
   `Spacing.s16`, `Button/Primary` ↔ `PrimaryButtonStyle`). Изменение UI строится из
   существующих токенов/компонентов; новый токен/компонент добавляется парно — в дизайн-файл
-  и в код. См. changes `adopt-pencil-design-system`, `pen-merge-safety`.
+  и в код. Обратная сторона в коде: `bash Scripts/ds-lint.sh` — запрещает во вью сырые
+  цвета/кегли/отступы/размеры мимо токенов. См. changes `adopt-pencil-design-system`,
+  `pen-merge-safety`.
 - **Мерж `.pen`** безопасен (автомерж), только если: правки в *разных* top-level `children`
   (разные экраны/области; добавление нового ребёнка — тоже ок); все `$var` есть в
   `variables`; `id` глобально уникальны; каждый `ref`/`descendants` разрешается; правки
@@ -104,7 +112,7 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
   Язык: системный, плюс `LANG`/`LC_*`/`--lang` в CLI (приоритет — см. `Localization`).
 - **Иконки** — только через реестр `Icons` (DesignSystem); не хардкодить имена SF Symbols во вью.
 - Идентификаторы: схема `sl`, bundle id приложения `com.shortlinks.app`
-  (CLI — `com.shortlinks.cli`, framework — `com.shortlinks.core`; см. `project.yml`).
+  (CLI — `com.shortlinks.cli`, ядро — `com.shortlinks.core`; см. `project.yml`).
 
 ## Git-процесс (gitflow)
 
@@ -129,6 +137,13 @@ xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
 
 ## Рабочий процесс (OpenSpec)
 
-Планы и спеки — в `openspec/`. Активное изменение: `bootstrap-shortlinks`. Прогресс —
-чекбоксы в `openspec/changes/bootstrap-shortlinks/tasks.md`. Команды: `/opsx:apply`,
+Планы и спеки — в `openspec/`: действующие возможности в `openspec/specs/`, изменения в
+работе — в `openspec/changes/` (завершённые уезжают в `openspec/changes/archive/`).
+Прогресс изменения — чекбоксы в его `tasks.md`. Команды: `/opsx:apply`, `/opsx:sync`,
 `/opsx:archive`.
+
+Активные изменения (оба реализованы, ждут архивации):
+
+- `bootstrap-shortlinks` — базовый функционал; открыт только ручной пункт 9.4
+  (проверка синхронизации на втором Mac).
+- `core-tests-and-ci` — юнит-тесты `ShortlinksCore` и GitHub Actions.

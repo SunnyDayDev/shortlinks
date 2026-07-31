@@ -24,22 +24,41 @@ xcodegen generate          # сгенерировать Shortlinks.xcodeproj и�
 open Shortlinks.xcodeproj  # собрать и запустить из Xcode (схема ShortlinksApp)
 ```
 
-CLI:
+Тесты доменной логики:
+
+```bash
+xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
+  -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
+```
+
+## Установка CLI
+
+Отдельно собирать и устанавливать CLI не нужно: `shortlinks` вкладывается внутрь
+`Shortlinks.app` (`Contents/Helpers/shortlinks`) при сборке приложения. Доступность из
+терминала включается в самом приложении — Настройки → «Командная строка» (или на шаге
+онбординга при первом запуске): создаётся симлинк в `~/.local/bin`, который должен быть
+в `PATH`.
+
+Сборка CLI отдельным таргетом нужна только для разработки:
 
 ```bash
 xcodebuild -project Shortlinks.xcodeproj -scheme shortlinks-cli -configuration Release build
-# бинарь окажется в DerivedData; для удобства можно слинковать в ~/bin
 ```
 
 ## Использование CLI
 
 ```bash
 shortlinks add https://example.com --once --ttl 24h   # → sl://link/<slug>
-shortlinks list --filter active
+shortlinks add ~/Documents/report.pdf --slug report --tag work --note "Отчёт за квартал"
+shortlinks list --filter active            # all | active | once | expired
 shortlinks resolve <slug>
 shortlinks open <slug>
 shortlinks rm <slug>
 ```
+
+Срок жизни (`--ttl`): `1h`, `24h`, `7d`, `never` (по умолчанию). Ссылку можно закрыть
+паролем (`--password`), пометить тегами (`--tag`, можно несколько) и снабдить описанием
+(`--note`). Язык вывода — системный, переопределяется `--lang`.
 
 ## Навык Claude (использование в других агентах)
 
@@ -55,9 +74,12 @@ claude --plugin-dir ./plugins/shortlinks
 /plugin install shortlinks@shortlinks
 ```
 
+Репозиторий приватный, поэтому установка по Git работает только при доступе к нему;
+иначе используйте `--plugin-dir` с локальной копией.
+
 После установки навык подхватывается автоматически, когда агенту нужно создать,
 найти, резолвить или открыть короткую ссылку. Сам CLI `shortlinks` должен быть
-доступен на машине (см. «Использование CLI» выше).
+доступен на машине (см. «Установка CLI» выше).
 
 ## Структура
 
@@ -65,12 +87,23 @@ claude --plugin-dir ./plugins/shortlinks
 project.yml              # XcodeGen-спека (источник истины по проекту)
 Sources/
   ShortlinksCore/        # доменная модель, хранилище, логика (общая)
-  ShortlinksApp/         # SwiftUI-приложение (меню-бар + окно)
+  ShortlinksApp/         # SwiftUI-приложение (меню-бар + окно) + дизайн-система
   shortlinks-cli/        # CLI
+Tests/                   # юнит-тесты ShortlinksCore
+design/                  # дизайн-макет shortlinks.pen (Pen) + validate_pen.py
 plugins/shortlinks/      # Claude-плагин с навыком работы с CLI
-_design/                 # исходный макет из Claude Design (референс)
+Scripts/                 # ds-lint.sh — линт дизайн-системы
+tools/                   # make_icon.swift — генератор иконки приложения
 openspec/                # спецификации и план изменений (OpenSpec)
 ```
+
+## Дизайн
+
+Источник правды по UI — файл [design/shortlinks.pen](design/shortlinks.pen), макет
+редактора Pen (прежнее название — Pencil). Внутри — страница «Design System» (токены и
+мастера компонентов) и экраны приложения, собранные из их инстансов; токены зеркалят
+слой `DesignSystem` в коде. Правки вносятся через Pen (MCP), проверка целостности
+файла — `python3 design/validate_pen.py`.
 
 ## Хранилище
 
