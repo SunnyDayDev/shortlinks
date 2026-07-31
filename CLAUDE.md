@@ -64,8 +64,8 @@ swift tools/make_icon.swift                         # перегенериров
   генерирует проект и прогоняет `ShortlinksCoreTests` при PR в `main` и push в `main`.
   GUI-приложение на CI не собирается (нужен самоподписанный сертификат) — проверяется
   логика ядра.
-- Required status checks технически не enforce'ятся (free private, как и branch
-  protection) — красный CI блокирует мерж по договорённости.
+- Required status checks enforce'ятся branch protection: чек «ShortlinksCore tests»
+  обязателен для мержа PR в `main` — красный CI блокирует мерж принудительно.
 
 ## Ключевые решения (см. `openspec/changes/bootstrap-shortlinks/design.md`)
 
@@ -130,10 +130,10 @@ swift tools/make_icon.swift                         # перегенериров
   (`git checkout main && git pull --ff-only`).
 - **UI и дизайн-файл**: PR, меняющий внешний вид приложения, включает обновление
   `design/shortlinks.pen`; если визуальных изменений нет — отметить это в описании PR.
-- **Branch protection** для `main` технически **не включена**: на бесплатном плане
-  GitHub она недоступна для приватного репозитория (нужен GitHub Pro или публичный
-  репо). Поэтому правило «только через PR» соблюдается по договорённости, а не
-  принудительно. При переходе на Pro/публичный репо — включить требование PR.
+- **Branch protection** для `main` **включена** (репозиторий публичный): изменения —
+  только через PR (обязательных апрувов нет — разработка соло), обязательный зелёный
+  чек «ShortlinksCore tests», правила действуют и для администратора, force-push и
+  удаление ветки запрещены.
 
 ## Рабочий процесс (OpenSpec)
 
