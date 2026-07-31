@@ -116,3 +116,10 @@ openspec/                # спецификации и план изменени
 
 Приложение подписывается самоподписанным сертификатом (manual signing, без
 provisioning profile). См. `CLAUDE.md` и `project.yml`.
+
+## Участие
+
+Проект разрабатывается по Spec-Driven Development на базе
+[OpenSpec](https://openspec.dev): спеки в `openspec/specs/` — источник правды,
+изменения логики проходят через процесс OpenSpec и обновляют их. Процесс, git-правила
+и проверки перед PR — в [CONTRIBUTING.md](CONTRIBUTING.md).
