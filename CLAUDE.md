@@ -1,149 +1,30 @@
-# CLAUDE.md — Shortlinks
+@AGENTS.md
 
-Локальный сервис коротких ссылок для macOS (нативное приложение + CLI). Короткий
-адрес — кастомная схема `sl://link/<slug>`, которую приложение обрабатывает в macOS.
-Опциональная синхронизация через файл в iCloud Drive.
+# Специфика Claude Code
 
-## Команды
+Общие правила проекта — в [AGENTS.md](AGENTS.md) (импортирован выше). Ниже только то,
+что относится к Claude Code.
 
-```bash
-xcodegen generate                                   # пересобрать .xcodeproj из project.yml
-xcodebuild -project Shortlinks.xcodeproj -scheme ShortlinksApp build
-xcodebuild -project Shortlinks.xcodeproj -scheme shortlinks-cli -configuration Release build
-xcodebuild test -project Shortlinks.xcodeproj -scheme ShortlinksCoreTests \
-  -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO   # юнит-тесты ShortlinksCore
-bash Scripts/ds-lint.sh                             # линт дизайн-системы (сырые значения во вью)
-python3 design/validate_pen.py                      # инварианты дизайн-файла .pen
-swift tools/make_icon.swift                         # перегенерировать AppIcon в Assets.xcassets
-```
+## Слэш-команды OpenSpec
 
-`Shortlinks.xcodeproj` генерируется и НЕ коммитится — правьте `project.yml`, затем
-`xcodegen generate`. После изменения списка файлов/таргетов всегда регенерируйте проект.
+Шаги цикла OpenSpec доступны и как слэш-команды (`.claude/commands/opsx/`), и как
+скиллы (`.agents/skills/`, автотриггер). Соответствие:
 
-## Модули (`Sources/`)
+| Команда | Скилл |
+| --- | --- |
+| `/opsx:propose` | `openspec-propose` |
+| `/opsx:apply` | `openspec-apply-change` |
+| `/opsx:sync` | `openspec-sync-specs` |
+| `/opsx:archive` | `openspec-archive-change` |
+| `/opsx:explore` | `openspec-explore` |
 
-- **ShortlinksCore** (`library.static`) — вся доменная логика, переиспользуется app и CLI:
-  - `Link` + `LinkKind`/`LinkStatus`, `StorageLocation`, `LinkStore`
-    (CRUD над единым `links.json` через `NSFileCoordinator`, атомарная запись),
-    `Slug`, `Scheme`, `Password` (соль+SHA-256), `ConflictMerge`.
-  - Локализация: реестр строк `Strings` + `Localization` (bundle-локатор каталога и
-    выбор языка) + `Format` (склонения/даты). String Catalog лежит в app-таргете
-    (`Localizable.xcstrings`); встроенный CLI резолвит его из ресурсов приложения,
-    standalone-CLI/тесты — фолбэк на `defaultValue` (русский). См. change
-    `extract-strings-and-icons`.
-- **ShortlinksApp** — SwiftUI `MenuBarExtra` + **единственное окно через AppKit**
-  (`AppDelegate`, `NSWindow` + `NSHostingController`, лениво). Фоновый агент
-  (`LSUIElement: true`) — без постоянной иконки в Dock. Сцена SwiftUI `Window` НЕ
-  используется намеренно: она выводит окно при запуске, из-за чего тихий переход по
-  `sl://` мигал бы окном. Обработка `sl://` — `AppDelegate.application(_:open:)`. Тихий
-  фоновый переход (активная многоразовая ссылка без пароля) идёт вообще без создания
-  окна; когда нужен UI (пароль/ненайдена/заблокирована/подтверждение) —
-  `surfaceForInteraction` поднимает политику до `.regular` и показывает окно, а по
-  закрытии оверлея/окна `AppModel.returnToBackground` прячет окно и возвращает
-  `.accessory`. Обычный запуск (клик по иконке/Spotlight) и reopen показывают окно:
-  `applicationShouldHandleReopen` + отложенная проверка в `didFinishLaunching`
-  (флаг `didOpenURLAtLaunch` отличает запуск ради `sl://` от клика по иконке). Экраны —
-  по дизайн-файлу `design/shortlinks.pen`.
-- **shortlinks-cli** — `swift-argument-parser`; команды add/list/rm/open/resolve.
-  CLI **вкладывается внутрь** `Shortlinks.app` (`Contents/Helpers/shortlinks`, copy-фаза
-  app-таргета) — отдельная установка не нужна. Путь `Helpers` (не `Contents/MacOS`)
-  выбран, чтобы имя `shortlinks` не конфликтовало с главным исполняемым `Shortlinks`
-  на регистронезависимом APFS. Доступность из терминала включается из
-  приложения (Настройки → «Командная строка» или онбординг при первом запуске): симлинк
-  на вложенный бинарь в `~/.local/bin`. Логика — `CLIInstaller` в ShortlinksCore.
-- **ShortlinksCoreTests** (`Tests/ShortlinksCoreTests`) — юнит-тесты доменной логики
-  (Slug/Scheme/Password/Link/ConflictMerge/Format/LinkStore/CLIInstaller). `LinkStore`
-  тестируется через `init(fileURL:watch:)` во временном файле. Новые тест-файлы требуют
-  `xcodegen generate` (xcodegen ведёт явный список файлов).
+## Скиллы и настройки
 
-## Тесты и CI
-
-- Локально: `xcodebuild test -scheme ShortlinksCoreTests … CODE_SIGNING_ALLOWED=NO`
-  (см. Команды). Подпись отключаем — самоподписанный серт для тест-бандла не нужен.
-- CI: `.github/workflows/ci.yml` на `macos-15` выбирает свежий Xcode, ставит XcodeGen,
-  генерирует проект и прогоняет `ShortlinksCoreTests` при PR в `main` и push в `main`.
-  GUI-приложение на CI не собирается (нужен самоподписанный сертификат) — проверяется
-  логика ядра.
-- Required status checks enforce'ятся branch protection: чек «ShortlinksCore tests»
-  обязателен для мержа PR в `main` — красный CI блокирует мерж принудительно.
-
-## Ключевые решения (см. `openspec/changes/bootstrap-shortlinks/design.md`)
-
-- Хранилище — **один файл** `links.json` (не SQLite, не файл-на-ссылку); запись через
-  координированное read-modify-write; конфликты iCloud сливаются по `id` ссылки.
-- Схема `sl://` вместо HTTP-сервера; регистрация через `CFBundleURLTypes`.
-- Приложение — фоновый агент (`LSUIElement`), переход по `sl://` тихий. Полностью «не
-  запускать приложение» при открытии `sl://` **нельзя**: macOS резолвит кастомную схему
-  через LaunchServices и обязана запустить процесс-обработчик. Достижимо лишь убрать
-  видимость запуска (иконку в Dock, перехват фокуса) — см. change `deeplink-silent-open`.
-- Без entitlements (нет App Sandbox / iCloud-capability) — бесплатный Apple ID.
-- Подпись — самоподписанный сертификат, `CODE_SIGN_STYLE: Manual`.
-- Одноразовая ссылка по умолчанию «сгорает» (`viewed`); удаление — опция в Настройках.
-- Swift language mode 5 (`SWIFT_VERSION: 5.0`) — чтобы не упираться в strict concurrency.
-
-## Конвенции
-
-- **Дизайн** — источник правды: `.pen`-файл `design/shortlinks.pen` (акцент `#2A6FDB`),
-  макет редактора **Pen** (прежнее название — Pencil; MCP-сервер по-прежнему называется
-  `pencil`). Прежний HTML-макет `_design/` удалён — он есть только в истории git.
-  Файл — обычный JSON (`version`/`themes`/`variables`/`children`/`fileToken`): читается и
-  диффается штатно. **Авторские правки — через Pen MCP** (чтобы сохранять инварианты:
-  уникальные `id`, целостность `ref`/`descendants`, схему `version`); ручная правка JSON —
-  только при разрешении merge-конфликта. Внутри: страница «Design System» (токены + мастера
-  компонентов) и экраны, собранные из их инстансов. Токены/компоненты зеркалят код
-  `DesignSystem` под согласованными именами (`accent` ↔ `Theme.accent`, `space-16` ↔
-  `Spacing.s16`, `Button/Primary` ↔ `PrimaryButtonStyle`). Изменение UI строится из
-  существующих токенов/компонентов; новый токен/компонент добавляется парно — в дизайн-файл
-  и в код. Обратная сторона в коде: `bash Scripts/ds-lint.sh` — запрещает во вью сырые
-  цвета/кегли/отступы/размеры мимо токенов. См. changes `adopt-pencil-design-system`,
-  `pen-merge-safety`.
-- **Мерж `.pen`** безопасен (автомерж), только если: правки в *разных* top-level `children`
-  (разные экраны/области; добавление нового ребёнка — тоже ок); все `$var` есть в
-  `variables`; `id` глобально уникальны; каждый `ref`/`descendants` разрешается; правки
-  `variables`/`themes` аддитивны и `version` совпадает. Все мастера и токены — в одном
-  ребёнке «Design System», поэтому две ветки, обе меняющие дизайн-систему, конфликтуют →
-  ручной мерж. Иначе — ручное разрешение в JSON или выбор одного варианта файла целиком
-  (`git checkout --ours/--theirs`). Проверка: `python3 design/validate_pen.py`.
-- Доменную логику добавлять в ShortlinksCore, а не дублировать в app/CLI.
-- **Строки** — только через реестр `Strings` (ShortlinksCore) поверх `Localizable.xcstrings`;
-  русский — язык-источник (`defaultValue`). Не хардкодить пользовательские литералы во
-  вью/CLI/`Format`. Склонения — plural-вариации каталога с фолбэком `Format.plural`. Перевод
-  на новый язык — запись в каталог + `CFBundleLocalizations` в `project.yml`, без правок кода.
-  Язык: системный, плюс `LANG`/`LC_*`/`--lang` в CLI (приоритет — см. `Localization`).
-- **Иконки** — только через реестр `Icons` (DesignSystem); не хардкодить имена SF Symbols во вью.
-- Идентификаторы: схема `sl`, bundle id приложения `com.shortlinks.app`
-  (CLI — `com.shortlinks.cli`, ядро — `com.shortlinks.core`; см. `project.yml`).
-
-## Git-процесс (gitflow)
-
-`main` — стабильная ветка. **Прямые коммиты в `main` запрещены** — любой функционал,
-исправление или правка ведётся в отдельной ветке и вливается в `main` через Pull Request.
-
-- **Ветка под каждое изменение**, ответвляется от свежего `main`. Именование:
-  `feat/<kebab>` (функционал), `fix/<kebab>` (исправление), `chore/<kebab>`
-  (обслуживание), `docs/<kebab>` (документация/спеки). Напр. `feat/links-export`.
-- **Мерж только через PR** с осмысленными заголовком и описанием (что и зачем).
-  Мержить можно только при зелёных проверках — как минимум сборка и, если затронуты
-  спеки, `openspec validate`.
-- **Слияние** — merge-commit (`gh pr merge <n> --merge --delete-branch`): сохраняет
-  связь PR↔коммиты. После мержа ветка удаляется, локальный `main` подтягивается
-  (`git checkout main && git pull --ff-only`).
-- **UI и дизайн-файл**: PR, меняющий внешний вид приложения, включает обновление
-  `design/shortlinks.pen`; если визуальных изменений нет — отметить это в описании PR.
-- **Branch protection** для `main` **включена** (репозиторий публичный): изменения —
-  только через PR (обязательных апрувов нет — разработка соло), обязательный зелёный
-  чек «ShortlinksCore tests», правила действуют и для администратора, force-push и
-  удаление ветки запрещены.
-
-## Рабочий процесс (OpenSpec)
-
-Планы и спеки — в `openspec/`: действующие возможности в `openspec/specs/`, изменения в
-работе — в `openspec/changes/` (завершённые уезжают в `openspec/changes/archive/`).
-Прогресс изменения — чекбоксы в его `tasks.md`. Команды: `/opsx:apply`, `/opsx:sync`,
-`/opsx:archive`.
-
-Активные изменения (оба реализованы, ждут архивации):
-
-- `bootstrap-shortlinks` — базовый функционал; открыт только ручной пункт 9.4
-  (проверка синхронизации на втором Mac).
-- `core-tests-and-ci` — юнит-тесты `ShortlinksCore` и GitHub Actions.
+- `.claude/skills/` — реальная директория с **симлинком на каждый скилл** в
+  `.agents/skills/`. Директорию целиком не симлинкать: обнаружение скиллов через
+  симлинкнутую директорию верхнего уровня ненадёжно. Новый скилл: создать в
+  `.agents/skills/<name>/`, затем `ln -sfn ../../.agents/skills/<name> .claude/skills/<name>`.
+- `.claude/settings.json` — проектные настройки, в git. `.claude/settings.local.json` —
+  машинные, в `.gitignore`; в репозиторий не коммитятся.
+- MCP-серверы (в т. ч. `pencil` для `design/shortlinks.pen`) настроены на уровне
+  пользователя — `.mcp.json` в репозитории намеренно нет.
