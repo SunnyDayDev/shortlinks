@@ -15,5 +15,12 @@ xcuserdata/
 # macOS
 .DS_Store
 
+# AI-агенты: машинные/локальные настройки, не в репозиторий
+.claude/settings.local.json
+.claude/*.local.json
+CLAUDE.local.md
+AGENTS.local.md
+.codex-log/
+
 # Misc
 *.log
